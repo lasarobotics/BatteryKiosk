@@ -22,7 +22,7 @@ class App(ctk.CTk):
     # Create match and test battery switch
     self.toggle_switch = ctk.CTkSwitch(
       master=self,
-      text="Testing Mode ?",
+      text="Testing Mode",
       bg_color="transparent",
       font=("Arial", 24),
       command=self.toggle_mode(),
