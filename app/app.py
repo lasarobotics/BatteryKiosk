@@ -25,7 +25,7 @@ class App(ctk.CTk):
       text="Testing Mode",
       bg_color="transparent",
       font=("Arial", 24),
-      command=self.toggle_mode(),
+      command=self.toggle_mode,
       variable=self.is_match_mode,
       onvalue="on",
       offvalue="off",
