@@ -1,5 +1,5 @@
 import tkinter as tk
-
+from PIL import Image
 import customtkinter as ctk
 
 
@@ -30,8 +30,22 @@ class App(ctk.CTk):
       onvalue="on",
       offvalue="off",
     )
-    self.toggle_switch.grid(row=0, column=0, padx=50, pady=30)
 
+    # Create battery frames
+    self.battery_one_widget = ctk.CTkFrame(
+      master=self, width="150", height="200", corner_radius=12
+    )
+
+    self.battery_one_widget.bind("<Button-1>", self.select_battery())
+    # Display First logo
+    self.first_logo_file = ctk.CTkImage(light_image=Image.open("app/Assets/FirstLogo.jpeg"),
+                                  size=(30, 30))
+    self.first_logo_label = ctk.CTkLabel(self, image=self.first_logo_file, text="")
+
+    # Position all widgets
+    self.battery_one_widget.grid(row=50, column=100, padx=20, pady=20)
+    self.toggle_switch.grid(row=0, column=0, padx=100, pady=60)
+    self.first_logo_label.grid(row=50,column=50,padx=20,pady=20)
   def toggle_mode(self):
     if self.is_match_mode:
       ...
