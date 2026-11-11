@@ -25,20 +25,20 @@ class App(ctk.CTk):
       text="Testing Mode",
       bg_color="transparent",
       font=("Arial", 24),
-      command=self.toggle_mode(),
+      command=self.toggle_mode,
       variable=self.is_match_mode,
       onvalue="on",
       offvalue="off",
     )
     self.toggle_switch.grid(padx=50, pady=30)
 
-    self.battery1 = ctk.CTkFrame(master=None, width=50, height=50)
-    self.battery2 = ctk.CTkFrame(master=None, width=50, height=50)
-    self.battery3 = ctk.CTkFrame(master=None,width=50, height=50)
+    self.battery1 = ctk.CTkFrame(master=self, width=50, height=50)
+    self.battery2 = ctk.CTkFrame(master=self, width=50, height=50)
+    self.battery3 = ctk.CTkFrame(master=self,width=50, height=50)
 
-    self.battery1.grid(padx=10, pady=300)
-    self.battery2.grid(padx=20, pady=300)
-    self.battery3.grid(padx=30, pady=300)
+    self.battery1.grid(row=0, column = 0, padx=10, pady=300)
+    self.battery2.grid(row=0, column = 1, padx=20, pady=300)
+    self.battery3.grid(row=0, column = 2, padx=30, pady=300)
 
   def toggle_mode(self):
     if self.is_match_mode:
