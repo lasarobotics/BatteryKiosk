@@ -35,7 +35,13 @@ class App(ctk.CTk):
     self.battery_one_widget = ctk.CTkFrame(
       master=self, width="150", height="200", corner_radius=12
     )
+     self.toggle_switch.grid(row=0, column=0, pax=20, paxy=20)
 
+    self.battery1 = ctk.CTkFrame(master=self, width=50, height=50)
+    self.battery2 = ctk.CTkFrame(master=self, width=50, height=50)
+    self.battery3 = ctk.CTkFrame(master=self,width=50, height=50)
+
+    
     self.battery_one_widget.bind("<Button-1>", self.select_battery())
     # Display First logo
     self.first_logo_file = ctk.CTkImage(light_image=Image.open("app/Assets/FirstLogo.jpeg"),
@@ -46,6 +52,10 @@ class App(ctk.CTk):
     self.battery_one_widget.grid(row=50, column=100, padx=20, pady=20)
     self.toggle_switch.grid(row=0, column=0, padx=100, pady=60)
     self.first_logo_label.grid(row=50,column=50,padx=20,pady=20)
+    self.battery1.grid(row=1, column = 1)
+    self.battery2.grid(row=2, column = 1)
+    self.battery3.grid(row=3, column = 1)
+
   def toggle_mode(self):
     if self.is_match_mode:
       ...
