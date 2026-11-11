@@ -31,11 +31,6 @@ class App(ctk.CTk):
       offvalue="off",
     )
 
-    # Create battery frames
-    self.battery_one_widget = ctk.CTkFrame(
-      master=self, width="150", height="200", corner_radius=12
-    )
-
     self.battery_one_widget.bind("<Button-1>", self.select_battery())
 
     # Position all widgets
