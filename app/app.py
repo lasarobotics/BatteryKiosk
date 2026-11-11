@@ -32,6 +32,10 @@ class App(ctk.CTk):
     )
     self.toggle_switch.grid(row=0, column=0, padx=50, pady=30)
 
+    self.battery1 = ctk.CTkFrame(width=200, height=200)
+    self.battery2 = ctk.CTkFrame(width=200, height=200)
+    self.battery3 = ctk.CTkFrame(width=200, height=200)
+
   def toggle_mode(self):
     if self.is_match_mode:
       ...
