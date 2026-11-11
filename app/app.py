@@ -36,6 +36,10 @@ class App(ctk.CTk):
     self.battery2 = ctk.CTkFrame(master=None, width=200, height=200)
     self.battery3 = ctk.CTkFrame(master=None,width=200, height=200)
 
+    self.battery1.grid(row=0, column=0, padx=250, pady=300)
+    self.battery2.grid(row=0, column=0, padx=500, pady=300)
+    self.battery3.grid(row=0, column=0, padx=750, pady=300)
+
   def toggle_mode(self):
     if self.is_match_mode:
       ...
