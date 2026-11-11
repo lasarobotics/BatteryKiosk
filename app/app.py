@@ -30,7 +30,7 @@ class App(ctk.CTk):
       onvalue="on",
       offvalue="off",
     )
-    self.toggle_switch.grid(row=0, column=0, padx=100, pady=60)
+    self.toggle_switch.grid(row=0, column=0, padx=50, pady=30)
 
   def toggle_mode(self):
     if self.is_match_mode:
