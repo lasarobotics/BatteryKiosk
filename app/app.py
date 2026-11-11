@@ -30,11 +30,6 @@ class App(ctk.CTk):
       onvalue="on",
       offvalue="off",
     )
-
-    self.battery_one_widget.bind("<Button-1>", self.select_battery())
-
-    # Position all widgets
-    self.battery_one_widget.grid(row=50, column=100, padx=20, pady=20)
     self.toggle_switch.grid(row=0, column=0, padx=100, pady=60)
 
   def toggle_mode(self):
