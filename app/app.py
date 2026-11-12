@@ -35,7 +35,11 @@ class App(ctk.CTk):
     self.battery_one_widget = ctk.CTkFrame(
       master=self, width="150", height="200", corner_radius=12
     )
+<<<<<<< Updated upstream
      self.toggle_switch.grid(row=0, column=0, pax=20, paxy=20)
+=======
+    self.toggle_switch.grid(row=0, column=0, padx=20, pady=20)
+>>>>>>> Stashed changes
 
     self.battery1 = ctk.CTkFrame(master=self, width=200, height=200)
     self.battery2 = ctk.CTkFrame(master=self, width=200, height=300)
