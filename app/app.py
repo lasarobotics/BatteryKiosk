@@ -31,7 +31,7 @@ class App(ctk.CTk):
       offvalue=False,
     )
     # Create Image
-    self.first_logo_file = ctk.CTkImage(light_image=Image.open("app/Assets/FirstLogo.jpeg"), size=(150, 150))
+    self.first_logo_file = ctk.CTkImage(light_image=Image.open("app/Assets/FirstLogo.png"), size=(150, 150))
    
     # display image with a CTkLabel
     self.first_logo_display = ctk.CTkLabel(self, image=self.first_logo_file, text="") 
