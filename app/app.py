@@ -21,6 +21,7 @@ class App(ctk.CTk):
 
   def create_widgets(self):
     # Create match and test battery switch
+
     self.toggle_switch = ctk.CTkCheckBox(
         master=self,
         text="Match Mode",
@@ -35,7 +36,7 @@ class App(ctk.CTk):
         corner_radius=5
     )
 
-self.toggle_switch.grid(row=0, column=0, padx=20, pady=20)
+    self.toggle_switch.grid(row=0, column=0, padx=20, pady=20)
     # Create Image
     self.first_logo_file = ctk.CTkImage(
         light_image=Image.open("app/Assets/FIRST_Logo.svg.webp"),
