@@ -30,6 +30,12 @@ class App(ctk.CTk):
       onvalue="on",
       offvalue="off",
     )
+    # Create Image
+    self.first_logo_file = ctk.CTkImage(light_image=Image.open("app/Assets/FirstLogo.jpeg"), size=(30, 30))
+   
+    # display image with a CTkLabel
+    self.first_logo_display = ctk.CTkLabel(self, image=self.first_logo_file, text="jensen tung") 
+    self.first_logo_display.grid(row=2,column=2,padx=0,pady=0)
 
     # Create battery frames
     self.battery_one_widget = ctk.CTkFrame(
