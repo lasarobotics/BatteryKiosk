@@ -20,6 +20,7 @@ class App(ctk.CTk):
     self.create_widgets()
 
   def create_widgets(self):
+
     # Create match and test battery switch
 
     self.toggle_switch = ctk.CTkCheckBox(
@@ -36,7 +37,8 @@ class App(ctk.CTk):
         corner_radius=5
     )
 
-    self.toggle_switch.grid(row=0, column=0, padx=20, pady=20)
+    self.toggle_switch.grid(row=1, column=0, padx=20, pady=20)
+
     # Create Image
     self.first_logo_file = ctk.CTkImage(
         light_image=Image.open("app/Assets/FIRST_Logo.svg.webp"),
@@ -51,7 +53,33 @@ class App(ctk.CTk):
         fg_color="transparent"
     )
 
-    self.first_logo_display.grid(row=1, column=1, padx=0, pady=0)
+    self.first_logo_display.grid(row=1, column=1, padx=0, pady=40)
+
+    text1 = ctk.CTkTextbox(
+        master=self,
+        width=160,
+        height=60,
+        corner_radius=5,
+        font=("Cambria Math", 48, "bold"),
+        fg_color="transparent",
+        bg_color="transparent",
+        text_color="black",
+    )
+    text1.insert("0.0", "2nd")
+    text1.place(x=140, y=225)
+
+    text2 = ctk.CTkTextbox(
+        master=self,
+        width=160,
+        height=60,
+        corner_radius=5,
+        font=("Cambria Math", 48, "bold"),
+        fg_color="transparent",
+        bg_color="transparent",
+        text_color="black",
+    )
+    text2.insert("0.0", "3rd")
+    text2.place(x=815, y=275)
 
     # Create battery frames
     self.battery_one_widget = ctk.CTkFrame(
@@ -59,13 +87,13 @@ class App(ctk.CTk):
     )
     self.toggle_switch.grid(row=0, column=0, padx=20, pady=20)
 
-    self.battery1 = ctk.CTkFrame(master=self, width=200, height=200, border_width=7, border_color="#80450b", fg_color="#d4700d")
-    self.battery2 = ctk.CTkFrame(master=self, width=200, height=300, border_width=7, border_color="#8c7304", fg_color="#e8b50c")
-    self.battery3 = ctk.CTkFrame(master=self, width=200, height=250, border_width=7, border_color="#838587", fg_color="#e3e2e1")
+    self.battery1 = ctk.CTkFrame(master=self, width=300, height=200, border_width=7, border_color="#838587", fg_color="#e3e2e1")
+    self.battery2 = ctk.CTkFrame(master=self, width=360, height=240, border_width=7, border_color="#8c7304", fg_color="#e8b50c")
+    self.battery3 = ctk.CTkFrame(master=self, width=240, height=160, border_width=7, border_color="#80450b", fg_color="#d4700d")
 
-    self.battery1.grid(row=2, column = 0, padx=(150, 10), pady=50, stick="s")
-    self.battery2.grid(row=2, column = 1, padx=(20, 10), pady=50, stick="s")
-    self.battery3.grid(row=2, column = 2, padx=(20, 10), pady=50, stick="s")
+    self.battery1.grid(row=2, column=0, padx=(42, 10), pady=(0, 100), stick="s")
+    self.battery2.grid(row=2, column=1, padx=10, pady=(0, 100), stick="s")
+    self.battery3.grid(row=2, column=2, padx=(10, 42), pady=(0, 100), stick="s")
 
   def toggle_mode(self):
     if self.is_match_mode.get():
