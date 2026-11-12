@@ -119,13 +119,27 @@ class App(ctk.CTk):
       self.second_logo_display.grid(row=1, column=1, padx=0, pady=40)
 
   def select_batteries(self):
-    self.batteries = self.bus.discovered_bfgs()
-    if self.batteries:
+    self.discovered_batteries = self.bus.discovered_bfgs()
+    if self.discovered_batteries:
+
+      self.batteries = [self.bus.get_bfg(battery.id) for battery in self.bus.discovered_bfgs()]
       if self.is_match_mode.get():
         self.find_match_batteries(self.batteries)
       else:
         self.find_testing_batteries(self.batteries)
     self.after(1000,self.select_batteries)
+  
+  def find_match_batteries(batteries):
+    highest_voltage_batteries = sorted(
+        batteries,
+        key=lambda battery: battery.voltage,
+        reverse=True
+    )[:3]
+    return highest_voltage_batteries
+    
+
+
+
   
     
   
