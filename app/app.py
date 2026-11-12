@@ -112,11 +112,11 @@ class App(ctk.CTk):
     if self.is_match_mode.get():
       self.configure(fg_color = "#882fed")
       self.second_logo_display.grid_remove()
-      self.first_logo_display.grid(row=1, column=1, padx=0, pady=0)
+      self.first_logo_display.grid(row=1, column=1, padx=0, pady=40)
     else:
       self.configure(fg_color = "#DE2020")
       self.first_logo_display.grid_remove()
-      self.second_logo_display.grid(row=1, column=1, padx=0, pady=0)
+      self.second_logo_display.grid(row=1, column=1, padx=0, pady=40)
 
   def select_batteries(self):
     self.batteries = self.bus.discovered_bfgs()
