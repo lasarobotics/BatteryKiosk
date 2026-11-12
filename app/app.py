@@ -10,6 +10,7 @@ class App(ctk.CTk):
     # Window Configuration
     self.title("Purple Haze Battery Kiosk")
     self.geometry("1024x600")
+    self.configure(fg_color = "#882fed")
     self.resizable(False, False)
 
     # Variables
@@ -53,12 +54,13 @@ class App(ctk.CTk):
 
   def toggle_mode(self):
     if self.is_match_mode:
-      ...
+      self.configure(fg_color = "#882fed")
     else:
-      ...
+      self.configure(fg_color = "red")
 
   def load_match_mode(self): ...
 
   def load_test_mode(self): ...
 
   def select_battery(self): ...
+  
