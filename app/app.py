@@ -1,6 +1,8 @@
 import tkinter as tk
 from PIL import Image
 import customtkinter as ctk
+from app.bfg_can import PWFCanBus
+
 
 
 class App(ctk.CTk):
@@ -15,22 +17,25 @@ class App(ctk.CTk):
 
     # Variables
     self.is_match_mode = tk.BooleanVar(value=True)
-
+    self.bus = PWFCanBus()
     # Initialize Widgets
     self.create_widgets()
+
+    # Start update loop
+    self.select_batteries()
 
   def create_widgets(self):
     # Create match and test battery switch
 
     self.toggle_switch = ctk.CTkCheckBox(
         master=self,
-        text="Match Mode",
+        text="Testing Mode",
         bg_color="transparent",
         font=("Arial", 24),
         command=self.toggle_mode,
         variable=self.is_match_mode,
-        onvalue=True,
-        offvalue=False,
+        onvalue=False,
+        offvalue=True,
         checkbox_width=24,
         checkbox_height=24,
         corner_radius=5
@@ -42,13 +47,21 @@ class App(ctk.CTk):
         light_image=Image.open("app/Assets/FIRST_Logo.svg.webp"),
         size=(150, 150)
     )
-
+    self.second_logo_file = ctk.CTkImage(
+        light_image=Image.open("app/Assets/SecondLogo.png"),
+        size=(150, 150)
+    )
     # Display image with a transparent background
     self.first_logo_display = ctk.CTkLabel(
         master=self,
         image=self.first_logo_file,
         text="",
         fg_color="transparent"
+    )
+    self.second_logo_display = ctk.CTkLabel(
+        master=self,
+        image=self.second_logo_file,
+        text=""
     )
 
     self.first_logo_display.grid(row=1, column=1, padx=0, pady=0)
@@ -70,12 +83,21 @@ class App(ctk.CTk):
   def toggle_mode(self):
     if self.is_match_mode.get():
       self.configure(fg_color = "#882fed")
+      self.second_logo_display.grid_remove()
+      self.first_logo_display.grid(row=1, column=1, padx=0, pady=0)
     else:
       self.configure(fg_color = "#DE2020")
+      self.first_logo_display.grid_remove()
+      self.second_logo_display.grid(row=1, column=1, padx=0, pady=0)
 
-  def load_match_mode(self): ...
-
-  def load_test_mode(self): ...
-
-  def select_battery(self): ...
+  def select_batteries(self):
+    self.batteries = self.bus.discovered_bfgs()
+    if self.batteries:
+      if self.is_match_mode.get():
+        self.find_match_batteries(self.batteries)
+      else:
+        self.find_testing_batteries(self.batteries)
+    self.after(1000,self.select_batteries)
+  
+    
   
