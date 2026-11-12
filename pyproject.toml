@@ -7,5 +7,6 @@ requires-python = ">=3.14"
 dependencies = [
     "customtkinter>=6.0.0",
     "libusb-package>=1.0.30.0",
+    "pillow>=13.0.0",
     "python-can[gs-usb]>=4.6.1",
 ]
