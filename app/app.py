@@ -129,6 +129,7 @@ class App(ctk.CTk):
         self.find_testing_batteries(self.batteries)
     self.after(1000,self.select_batteries)
   
+  # Returns 3 batteries (in descending order of voltage)
   def find_match_batteries(batteries):
     highest_voltage_batteries = sorted(
         batteries,
@@ -136,6 +137,17 @@ class App(ctk.CTk):
         reverse=True
     )[:3]
     return highest_voltage_batteries
+  
+  # Returns 3 batteries (in ascending number of cycles)
+  def find_testing_batteries(self,batteries):
+    highest_voltage_batteries = self.find_match_batteries()
+    batteries_excluding_highest_voltages = [battery for battery in batteries if battery not in highest_voltage_batteries]
+    lowest_cycled_batteries = sorted(
+        batteries_excluding_highest_voltages,
+        key=lambda battery: battery.getNumCycles(),
+        reverse=False
+    )[:3]
+    return lowest_cycled_batteries
     
 
 
