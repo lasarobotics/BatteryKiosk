@@ -30,7 +30,12 @@ class App(ctk.CTk):
       onvalue="on",
       offvalue="off",
     )
-    self.toggle_switch.grid(row=0, column=0, padx=20, pady=20)
+
+    # Create battery frames
+    self.battery_one_widget = ctk.CTkFrame(
+      master=self, width="150", height="200", corner_radius=12
+    )
+     self.toggle_switch.grid(row=0, column=0, pax=20, paxy=20)
 
     self.battery1 = ctk.CTkFrame(master=self, width=200, height=200)
     self.battery2 = ctk.CTkFrame(master=self, width=200, height=300)
