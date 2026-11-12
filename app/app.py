@@ -43,9 +43,9 @@ class App(ctk.CTk):
     )
     self.toggle_switch.grid(row=0, column=0, padx=20, pady=20)
 
-    self.battery1 = ctk.CTkFrame(master=self, width=200, height=200, border_width=7, border_color="#80450b", fg_color="")
-    self.battery2 = ctk.CTkFrame(master=self, width=200, height=300, border_width=7, border_color="#838587")
-    self.battery3 = ctk.CTkFrame(master=self, width=200, height=250, border_width=7, border_color="#8c7304")
+    self.battery1 = ctk.CTkFrame(master=self, width=200, height=200, border_width=7, border_color="#80450b", fg_color="#d4700d")
+    self.battery2 = ctk.CTkFrame(master=self, width=200, height=300, border_width=7, border_color="#8c7304", fg_color="#e8b50c")
+    self.battery3 = ctk.CTkFrame(master=self, width=200, height=250, border_width=7, border_color="#838587", fg_color="#e3e2e1")
 
     self.battery1.grid(row=1, column = 1, padx=25, pady=50, stick="s")
     self.battery2.grid(row=1, column = 2, padx=25, pady=50, stick="s")
