@@ -31,11 +31,20 @@ class App(ctk.CTk):
       offvalue=False,
     )
     # Create Image
-    self.first_logo_file = ctk.CTkImage(light_image=Image.open("app/Assets/FirstLogo.png"), size=(150, 150))
-   
-    # display image with a CTkLabel
-    self.first_logo_display = ctk.CTkLabel(self, image=self.first_logo_file, text="") 
-    self.first_logo_display.grid(row=1,column=1,padx=0,pady=0)
+    self.first_logo_file = ctk.CTkImage(
+        light_image=Image.open("app/Assets/FirstLogo.png"),
+        size=(150, 150)
+    )
+
+    # Display image with a transparent background
+    self.first_logo_display = ctk.CTkLabel(
+        master=self,
+        image=self.first_logo_file,
+        text="",
+        fg_color="transparent"
+    )
+
+    self.first_logo_display.grid(row=1, column=1, padx=0, pady=0)
 
     # Create battery frames
     self.battery_one_widget = ctk.CTkFrame(
