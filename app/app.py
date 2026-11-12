@@ -32,7 +32,7 @@ class App(ctk.CTk):
     )
     # Create Image
     self.first_logo_file = ctk.CTkImage(
-        light_image=Image.open("app/Assets/FirstLogo.png"),
+        light_image=Image.open("app/Assets/FirstLogo.jpeg"),
         size=(150, 150)
     )
 
