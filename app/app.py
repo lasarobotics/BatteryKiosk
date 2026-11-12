@@ -68,10 +68,10 @@ class App(ctk.CTk):
     self.battery3.grid(row=2, column = 2, padx=(20, 10), pady=50, stick="s")
 
   def toggle_mode(self):
-    if self.is_match_mode:
+    if self.is_match_mode.get():
       self.configure(fg_color = "#882fed")
     else:
-      self.configure(fg_color = "red")
+      self.configure(fg_color = "#DE2020")
 
   def load_match_mode(self): ...
 
