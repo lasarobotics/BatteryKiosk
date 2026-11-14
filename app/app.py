@@ -43,7 +43,7 @@ class App(ctk.CTk):
       corner_radius=5,
     )
 
-    self.toggle_switch.grid(row=1, column=0, padx=20, pady=20)
+    self.toggle_switch.grid(row=0, column=0, padx=20, pady=20)
 
     # Create Image
     self.first_logo_file = ctk.CTkImage(
@@ -89,11 +89,6 @@ class App(ctk.CTk):
     text2.place(x=815, y=275)
 
     # Create battery frames
-    self.battery_one_widget = ctk.CTkFrame(
-      master=self, width=150, height=200, corner_radius=12
-    )
-    self.toggle_switch.grid(row=0, column=0, padx=20, pady=20)
-
     self.battery1 = ctk.CTkFrame(
       master=self,
       width=300,
