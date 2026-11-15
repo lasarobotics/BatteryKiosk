@@ -2,6 +2,7 @@ import tkinter as tk
 
 import customtkinter as ctk
 from PIL import Image
+from os import path
 
 from app.bfg_can import PWFCanBus
 
@@ -16,7 +17,9 @@ class App(ctk.CTk):
     self.configure(fg_color="#663399")
     self.resizable(False, False) # width, height
 
-    self.iconbitmap("app/Assets/LasaRoboticsLogo.ico")
+    png_path = path.join(path.dirname(path.abspath(__file__)), "Assets/LasaRoboticsLogo.png")
+    self.icon_image = tk.PhotoImage(png_path)
+    self.wm_iconphoto(True, self.icon_image)
 
     # Variables
     self.is_match_mode = tk.BooleanVar(value=True)
@@ -28,6 +31,11 @@ class App(ctk.CTk):
     self.select_batteries()
 
   def create_widgets(self):
+
+    # Configure row weights so Row 0 stays compact and Rows 1-2 share remaining height
+    self.grid_rowconfigure(0, weight=0)
+    self.grid_rowconfigure(1, weight=1)
+    self.grid_rowconfigure(2, weight=1)
 
     # Create match and test battery switch
 
@@ -45,8 +53,7 @@ class App(ctk.CTk):
       checkbox_height=24,
       corner_radius=5,
     )
-
-    self.toggle_switch.grid(row=0, column=0, padx=20, pady=20)
+    self.toggle_switch.grid(row=0, column=0, padx=20, pady=(15, 10))
 
     # Create Image
     self.first_logo_file = ctk.CTkImage(
@@ -63,7 +70,7 @@ class App(ctk.CTk):
       master=self, image=self.second_logo_file, text=""
     )
 
-    self.first_logo_display.grid(row=1, column=1, padx=0, pady=40)
+    self.first_logo_display.grid(row=1, column=1, padx=0, pady=30)
 
     self.text2nd = ctk.CTkLabel(
       master=self,
@@ -73,7 +80,7 @@ class App(ctk.CTk):
       font=("Arial", 48),
       anchor="s", # south
     )
-    self.text2nd.grid(row=1, column=0, padx=(30, 0), ipady=100)
+    self.text2nd.grid(row=1, column=0, padx=(30, 0), pady=(0, 8), sticky="s")
 
     self.text3rd = ctk.CTkLabel(
       master=self,
@@ -83,7 +90,7 @@ class App(ctk.CTk):
       font=("Arial", 48),
       anchor="s", # south
     )
-    self.text3rd.grid(row=1, column=2, padx=(10, 42), ipady=100)
+    self.text3rd.grid(row=1, column=2, padx=(10, 42), pady=(0, 8), sticky="s")
 
     self.test_yell = ctk.CTkLabel(
       master=self,
@@ -92,11 +99,11 @@ class App(ctk.CTk):
       text_color_disabled="#663399",
       fg_color="transparent",
       bg_color="transparent",
-      font=("Arial", 36),
+      font=("Arial", 30),
       # anchor="s", # south
     )
     self.test_yell.configure(state="disabled")
-    self.test_yell.grid(row=0, column=1, columnspan=2)
+    self.test_yell.grid(row=0, column=1, columnspan=2, pady=(5, 0))
 
     # Create battery frames
     self.battery1 = ctk.CTkFrame(
@@ -124,23 +131,21 @@ class App(ctk.CTk):
       fg_color="#e3e2e1",
     )
 
-    self.battery1.grid(row=2, column=0, padx=(42, 10), pady=(0, 100), stick="s")
-    self.battery2.grid(row=2, column=1, padx=10, pady=(0, 100), stick="s")
-    self.battery3.grid(row=2, column=2, padx=(10, 42), pady=(0, 100), stick="s")
+    self.battery1.grid(row=2, column=0, padx=(42, 10), pady=(0, 35), stick="s")
+    self.battery2.grid(row=2, column=1, padx=10, pady=(0, 35), stick="s")
+    self.battery3.grid(row=2, column=2, padx=(10, 42), pady=(0, 35), stick="s")
 
   def toggle_mode(self):
     if self.is_match_mode.get():
       self.configure(fg_color="#663399")
       self.second_logo_display.grid_remove()
-      self.first_logo_display.grid(row=1, column=1, padx=0, pady=40)
+      self.first_logo_display.grid(row=1, column=1, padx=0, pady=30)
       self.test_yell.configure(state="disabled")
-      # self.test_yell_right.configure(state="disabled")
     else:
       self.configure(fg_color="#DE2020")
       self.first_logo_display.grid_remove()
-      self.second_logo_display.grid(row=1, column=1, padx=0, pady=40)
+      self.second_logo_display.grid(row=1, column=1, padx=0, pady=30)
       self.test_yell.configure(state="normal")
-      # self.test_yell_right.configure(state="normal")
 
   def select_batteries(self):
     self.discovered_batteries = self.bus.discovered_bfgs()
