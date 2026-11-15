@@ -13,8 +13,10 @@ class App(ctk.CTk):
     # Window Configuration
     self.title("Purple Haze Battery Kiosk")
     self.geometry("1024x600")
-    self.configure(fg_color="#882fed")
-    self.resizable(False, False)
+    self.configure(fg_color="#663399")
+    self.resizable(False, False) # width, height
+
+    self.iconbitmap("app/Assets/LasaRoboticsLogo.ico")
 
     # Variables
     self.is_match_mode = tk.BooleanVar(value=True)
@@ -33,6 +35,7 @@ class App(ctk.CTk):
       master=self,
       text="Testing Mode",
       bg_color="transparent",
+      border_color="black",
       font=("Arial", 24),
       command=self.toggle_mode,
       variable=self.is_match_mode,
@@ -62,31 +65,38 @@ class App(ctk.CTk):
 
     self.first_logo_display.grid(row=1, column=1, padx=0, pady=40)
 
-    text1 = ctk.CTkTextbox(
+    self.text2nd = ctk.CTkLabel(
       master=self,
-      width=160,
-      height=60,
-      corner_radius=5,
-      font=("Cambria Math", 48, "bold"),
+      text="2nd",
       fg_color="transparent",
       bg_color="transparent",
-      text_color="black",
+      font=("Arial", 48),
+      anchor="s", # south
     )
-    text1.insert("0.0", "2nd")
-    text1.place(x=140, y=225)
+    self.text2nd.grid(row=1, column=0, padx=(30, 0), ipady=100)
 
-    text2 = ctk.CTkTextbox(
+    self.text3rd = ctk.CTkLabel(
       master=self,
-      width=160,
-      height=60,
-      corner_radius=5,
-      font=("Cambria Math", 48, "bold"),
+      text="3rd",
       fg_color="transparent",
       bg_color="transparent",
-      text_color="black",
+      font=("Arial", 48),
+      anchor="s", # south
     )
-    text2.insert("0.0", "3rd")
-    text2.place(x=815, y=275)
+    self.text3rd.grid(row=1, column=2, padx=(10, 42), ipady=100)
+
+    self.test_yell = ctk.CTkLabel(
+      master=self,
+      text="BATTERIES FOR TESTING!\nDO NOT USE FOR MATCH!!",
+      text_color="black",
+      text_color_disabled="#663399",
+      fg_color="transparent",
+      bg_color="transparent",
+      font=("Arial", 36),
+      # anchor="s", # south
+    )
+    self.test_yell.configure(state="disabled")
+    self.test_yell.grid(row=0, column=1, columnspan=2)
 
     # Create battery frames
     self.battery1 = ctk.CTkFrame(
@@ -102,16 +112,16 @@ class App(ctk.CTk):
       width=360,
       height=240,
       border_width=7,
-      border_color="#8c7304",
-      fg_color="#e8b50c",
+      border_color="#838587",
+      fg_color="#e3e2e1",
     )
     self.battery3 = ctk.CTkFrame(
       master=self,
       width=240,
       height=160,
       border_width=7,
-      border_color="#80450b",
-      fg_color="#d4700d",
+      border_color="#838587",
+      fg_color="#e3e2e1",
     )
 
     self.battery1.grid(row=2, column=0, padx=(42, 10), pady=(0, 100), stick="s")
@@ -120,13 +130,17 @@ class App(ctk.CTk):
 
   def toggle_mode(self):
     if self.is_match_mode.get():
-      self.configure(fg_color="#882fed")
+      self.configure(fg_color="#663399")
       self.second_logo_display.grid_remove()
       self.first_logo_display.grid(row=1, column=1, padx=0, pady=40)
+      self.test_yell.configure(state="disabled")
+      # self.test_yell_right.configure(state="disabled")
     else:
       self.configure(fg_color="#DE2020")
       self.first_logo_display.grid_remove()
       self.second_logo_display.grid(row=1, column=1, padx=0, pady=40)
+      self.test_yell.configure(state="normal")
+      # self.test_yell_right.configure(state="normal")
 
   def select_batteries(self):
     self.discovered_batteries = self.bus.discovered_bfgs()
