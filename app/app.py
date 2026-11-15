@@ -18,17 +18,20 @@ class App(ctk.CTk):
     self.resizable(False, False) # width, height
 
     png_path = path.join(path.dirname(path.abspath(__file__)), "Assets/LasaRoboticsLogo.png")
-    self.icon_image = tk.PhotoImage(png_path)
+    self.icon_image = tk.PhotoImage(file=png_path)
     self.wm_iconphoto(True, self.icon_image)
 
     # Variables
     self.is_match_mode = tk.BooleanVar(value=True)
     self.bus = PWFCanBus()
+
+    # Open CanBus TODO error handling
+    self.bus.open()
     # Initialize Widgets
     self.create_widgets()
 
     # Start update loop
-    self.select_batteries()
+    self.display_batteries()
 
   def create_widgets(self):
 
@@ -130,10 +133,24 @@ class App(ctk.CTk):
       border_color="#838587",
       fg_color="#e3e2e1",
     )
+    self.battery1.grid_propagate(False)
+    self.battery2.grid_propagate(False)
+    self.battery3.grid_propagate(False)
+    self.battery1.grid(row=2, column=0, padx=(42, 10), pady=(0, 100), sticky="s")
+    self.battery2.grid(row=2, column=1, padx=10, pady=(0, 100), sticky="s")
+    self.battery3.grid(row=2, column=2, padx=(10, 42), pady=(0, 100), sticky="s")
 
-    self.battery1.grid(row=2, column=0, padx=(42, 10), pady=(0, 35), stick="s")
-    self.battery2.grid(row=2, column=1, padx=10, pady=(0, 35), stick="s")
-    self.battery3.grid(row=2, column=2, padx=(10, 42), pady=(0, 35), stick="s")
+    self.battery_frames = [self.battery1,self.battery2,self.battery3]
+    self.battery_labels = [[],[],[]]
+    for i in range(3):
+      self.battery_labels[i] = [ctk.CTkLabel(self.battery_frames[i],text="Battery: ----",font=('Arial',38),fg_color="transparent"),
+      ctk.CTkLabel(self.battery_frames[i],text="Voltage: ----",font=('Arial',20),fg_color="transparent"),
+      ctk.CTkLabel(self.battery_frames[i],text="# Cycles: ----",font=('Arial',20),fg_color="transparent"),
+      ctk.CTkLabel(self.battery_frames[i],text="Charging for: ----",font=('Arial',20),fg_color="transparent")]
+      self.battery_frames[i].grid_columnconfigure(0, weight=1)
+      for j in range(4):
+        self.battery_frames[i].grid_rowconfigure(j, weight=1)
+        self.battery_labels[i][j].grid(row=j,column=0,padx=0,pady=(12,5) if j == 0 else (5, 5))
 
   def toggle_mode(self):
     if self.is_match_mode.get():
@@ -148,33 +165,52 @@ class App(ctk.CTk):
       self.test_yell.configure(state="normal")
 
   def select_batteries(self):
+    self.batteries = []
     self.discovered_batteries = self.bus.discovered_bfgs()
-    if self.discovered_batteries:
-      self.batteries = [
-        self.bus.get_bfg(battery.id) for battery in self.bus.discovered_bfgs()
-      ]
-      if self.is_match_mode.get():
-        self.find_match_batteries(self.batteries)
-      else:
-        self.find_testing_batteries(self.batteries)
-    self.after(1000, self.select_batteries)
+    
+    self.batteries = [
+      self.bus.get_bfg(battery.id).update() for battery in self.discovered_batteries
+    ]
+    if self.is_match_mode.get():
+      return self.find_match_batteries(self.batteries)
+    else:
+      return self.find_testing_batteries(self.batteries)
 
   # Returns 3 batteries (in descending order of voltage)
-  def find_match_batteries(batteries):
-    highest_voltage_batteries = sorted(
-      batteries, key=lambda battery: battery.voltage, reverse=True
-    )[:3]
+  def find_match_batteries(self,batteries):
+    highest_voltage_batteries = (sorted(
+      batteries, key=lambda battery: battery.get_voltage(), reverse=True
+    )+[None] * 3)[:3]
     return highest_voltage_batteries
 
   # Returns 3 batteries (in ascending number of cycles)
+  # If less than 3 batteries, list is filled with null 
   def find_testing_batteries(self, batteries):
-    highest_voltage_batteries = self.find_match_batteries()
+    highest_voltage_batteries = self.find_match_batteries(batteries)
     batteries_excluding_highest_voltages = [
       battery for battery in batteries if battery not in highest_voltage_batteries
     ]
-    lowest_cycled_batteries = sorted(
+    lowest_cycled_batteries = (sorted(
       batteries_excluding_highest_voltages,
-      key=lambda battery: battery.getNumCycles(),
+      key=lambda battery: battery.get_num_cycles(),
       reverse=False,
-    )[:3]
+    )+[None] * 3)[:3]
     return lowest_cycled_batteries
+  
+  # Displays the information
+  def display_batteries(self):
+    selected_batteries = self.select_batteries()
+    for i in range(3):
+      if selected_batteries[i] is not None:
+          self.battery_labels[i][0].configure(text="Battery: " + str(selected_batteries[i].sensor_id))
+          self.battery_labels[i][1].configure(text="Voltage: " + str(selected_batteries[i].get_voltage()))
+          self.battery_labels[i][2].configure(text="# Cycles: " + str(selected_batteries[i].get_num_cycles()))
+          self.battery_labels[i][3].configure(text="Charging for: " + str(selected_batteries[i].get_cycle_charge_time()))
+      else:
+        self.battery_labels[i][0].configure(text="Battery: ----")
+        self.battery_labels[i][1].configure(text="Voltage: ----")
+        self.battery_labels[i][2].configure(text="# Cycles: ----")
+        self.battery_labels[i][3].configure(text="Charging for: ----")
+    self.after(1000, self.display_batteries)
+
+  #TODO close Bus
