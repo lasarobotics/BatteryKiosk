@@ -143,14 +143,14 @@ class App(ctk.CTk):
     self.battery_frames = [self.battery1,self.battery2,self.battery3]
     self.battery_labels = [[],[],[]]
     for i in range(3):
-      self.battery_labels[i] = [ctk.CTkLabel(self.battery_frames[i],text="Battery: ----",font=('Arial',38),fg_color="transparent"),
-      ctk.CTkLabel(self.battery_frames[i],text="Voltage: ----",font=('Arial',20),fg_color="transparent"),
-      ctk.CTkLabel(self.battery_frames[i],text="# Cycles: ----",font=('Arial',20),fg_color="transparent"),
-      ctk.CTkLabel(self.battery_frames[i],text="Charging for: ----",font=('Arial',20),fg_color="transparent")]
+      self.battery_labels[i] = [ctk.CTkLabel(self.battery_frames[i],text="Battery: ----",font=('Arial',28),fg_color="transparent"),
+      ctk.CTkLabel(self.battery_frames[i],text="Voltage: ----",font=('Arial',18),fg_color="transparent"),
+      ctk.CTkLabel(self.battery_frames[i],text="# Cycles: ----",font=('Arial',18),fg_color="transparent"),
+      ctk.CTkLabel(self.battery_frames[i],text="Charging for: ----",font=('Arial',10),fg_color="transparent")]
       self.battery_frames[i].grid_columnconfigure(0, weight=1)
       for j in range(4):
         self.battery_frames[i].grid_rowconfigure(j, weight=1)
-        self.battery_labels[i][j].grid(row=j,column=0,padx=0,pady=(12,5) if j == 0 else (5, 5))
+        self.battery_labels[i][j].grid(row=j,column=0,padx=0,pady=(10,0) if j == 0 else (0, 5))
 
   def toggle_mode(self):
     if self.is_match_mode.get():
@@ -197,6 +197,15 @@ class App(ctk.CTk):
     )+[None] * 3)[:3]
     return lowest_cycled_batteries
   
+  # Converts seconds to hours and minutes
+  def seconds_converter(self,seconds):
+    hours = seconds//3600
+    minutes = (seconds%3600)//60
+    str_minutes = " Minutes" if minutes > 1 else " Minute"
+    if hours > 0:
+      str_hours = " Hours, " if hours > 1 else " Hour, "
+      return str(hours) +str_hours + str(minutes) + str_minutes
+    return str(minutes) + str_minutes
   # Displays the information
   def display_batteries(self):
     selected_batteries = self.select_batteries()
@@ -205,7 +214,7 @@ class App(ctk.CTk):
           self.battery_labels[i][0].configure(text="Battery: " + str(selected_batteries[i].sensor_id))
           self.battery_labels[i][1].configure(text="Voltage: " + str(selected_batteries[i].get_voltage()))
           self.battery_labels[i][2].configure(text="# Cycles: " + str(selected_batteries[i].get_num_cycles()))
-          self.battery_labels[i][3].configure(text="Charging for: " + str(selected_batteries[i].get_cycle_charge_time()))
+          self.battery_labels[i][3].configure(text="Charging for: " + self.seconds_converter(selected_batteries[i].get_cycle_charge_time()))
       else:
         self.battery_labels[i][0].configure(text="Battery: ----")
         self.battery_labels[i][1].configure(text="Voltage: ----")
