@@ -192,7 +192,7 @@ class App(ctk.CTk):
       battery for battery in batteries if battery not in highest_voltage_batteries
     ]
     lowest_cycled_batteries = (sorted(
-      batteries_exclud3ing_highest_voltages,
+      batteries_excluding_highest_voltages,
       key=lambda battery: battery.get_num_cycles(),
       reverse=False,
     )+[None] * 3)[:3]
