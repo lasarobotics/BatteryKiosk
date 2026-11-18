@@ -143,12 +143,13 @@ class App(ctk.CTk):
     self.battery_frames = [self.battery1,self.battery2,self.battery3]
     self.battery_labels = [[],[],[]]
     for i in range(3):
-      self.battery_labels[i] = [ctk.CTkLabel(self.battery_frames[i],text="Battery: ----",font=('Arial',28),fg_color="transparent"),
+      self.battery_labels[i] = [
+      ctk.CTkLabel(self.battery_frames[i],text="Battery: ----",font=('Arial',28),fg_color="transparent"),
       ctk.CTkLabel(self.battery_frames[i],text="Voltage: ----",font=('Arial',18),fg_color="transparent"),
       ctk.CTkLabel(self.battery_frames[i],text="# Cycles: ----",font=('Arial',18),fg_color="transparent"),
       ctk.CTkLabel(self.battery_frames[i],text="Charging for: ----",font=('Arial',10),fg_color="transparent")]
       self.battery_frames[i].grid_columnconfigure(0, weight=1)
-      for j in range(4):
+      for j in range(4): 
         self.battery_frames[i].grid_rowconfigure(j, weight=1)
         self.battery_labels[i][j].grid(row=j,column=0,padx=0,pady=(10,0) if j == 0 else (0, 5))
 
