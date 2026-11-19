@@ -14,15 +14,16 @@ Quick start
     import time
     from app.bfg_can import PWFCanBus
 
-    with PWFCanBus() as bus:              # finds a CAN adapter, or raises RuntimeError
+    with PWFCanBus() as bus:              # opens can0, or raises RuntimeError
         bfg = bus.get_bfg(1)              # 1 = the BFG's CAN ID (srcaddr)
         while True:
             state = bfg.update()          # decode the latest CAN messages into a snapshot
             print(state.get_voltage(), state.get_remaining_charge_pct(), state.get_num_cycles())
             time.sleep(1)
 
-To see it working, run `uv run python -m app.bfg_can`. It prints every BFG
-on the bus once a second.
+To see it working, run `uv run python -m app.bfg_can` (or
+`uv run python -m app.bfg_can can1` for another interface). It prints every
+BFG on the bus once a second. Bring can0 up first; see "Hardware / setup".
 
 
 How it works: update() and snapshots
@@ -57,13 +58,15 @@ Tk main loop via `after()`). Snapshots are safe to pass to other threads.
 API overview
 ------------
 
-PWFCanBus: opens the adapter and gives you BFG objects.
+PWFCanBus(channel="can0"): opens the CAN interface and gives you BFG objects.
     open() / close(), or use it as a context manager (`with PWFCanBus() as bus`)
+                             open() returns False (and logs why) if the
+                             interface is missing or down
     get_bfg(sensor_id)       the BattFuelGauge for that CAN ID (the same object every time)
     discovered_bfgs()        PWFController entries (.id, .serialNumber,
                              .firmwareVersion) for BFGs whose heartbeat
                              arrived in the last 4 s
-    can.driver               "gs_usb", "pcan", "custom" or None
+    can.driver               "socketcan", "custom" (you passed a bus in) or None
 
 BattFuelGauge: one BFG on the bus. Handles the CAN side only.
     update() -> BfgState     decode the latest messages and return a snapshot
@@ -115,24 +118,60 @@ BfgState: a snapshot. Every getter returns a saved value.
 Hardware / setup
 ----------------
 
-Adapters are tried in the same order as the C++ app, at 1 Mbit/s:
-  1. a candlelight (gs_usb) device such as a CANable. On Windows we use the
-     libusb-1.0.dll that comes with the `libusb-package` dependency.
-  2. a PEAK PCAN adapter on PCAN_USBBUS1. This needs PEAK's driver
-     (PCANBasic.dll) installed.
+This uses Linux SocketCAN, so it runs on a Raspberry Pi (Raspberry Pi OS /
+Raspbian) or any other Linux machine, but not on Windows or macOS. It opens
+can0 by default; pass `channel=` to use a different interface.
+
+Any adapter the kernel turns into a canN interface works, for example:
+  * an SPI CAN HAT with an MCP2515 (Waveshare RS485 CAN HAT, PiCAN2, ...).
+    Enable it in /boot/firmware/config.txt (/boot/config.txt on older
+    images), with the oscillator and interrupt pin your HAT uses, e.g.
+        dtparam=spi=on
+        dtoverlay=mcp2515-can0,oscillator=12000000,interrupt=25
+    then reboot.
+  * a USB adapter: CANable / candlelight (gs_usb driver) or PEAK PCAN-USB
+    (peak_usb driver). Both drivers are built into the kernel, so they show
+    up as can0 as soon as they're plugged in. No extra install needed.
+
+BFGs use 1 Mbit/s. The bitrate is set when the interface is brought up, not
+by this code:
+
+    sudo ip link set can0 up type can bitrate 1000000
+
+To bring it up automatically at boot, create /etc/systemd/network/80-can.network:
+
+    [Match]
+    Name=can0
+
+    [CAN]
+    BitRate=1M
+
+then run `sudo systemctl enable --now systemd-networkd`.
+
+To check that traffic is arriving, run `candump can0` (from
+`sudo apt install can-utils`). BFG messages have IDs like 0A0B00xx.
+
+If can0 is missing or down, open() returns False and logs a message saying
+which one and how to fix it.
 
 Safety (from upstream): if the BFG is also connected to a battery charger,
-use a galvanically isolated CAN adapter.
+use a galvanically isolated CAN adapter or HAT.
 
-To test without hardware, pass in any python-can bus:
+To test without hardware, either pass in any python-can bus (this works on
+Windows too):
 
     bus = PWFCanBus(can.Bus(interface="virtual", channel="test"))
+
+or, on Linux, use a virtual SocketCAN interface:
+
+    sudo ip link add dev vcan0 type vcan && sudo ip link set vcan0 up
+    bus = PWFCanBus(channel="vcan0")
 
 
 What maps to what (C++ -> Python)
 ---------------------------------
 
-    halCAN.c + the CANSessionMux shim in main.cpp  ->  CanInterface
+    halCAN.c + the CANSessionMux shim in main.cpp  ->  CanInterface (SocketCAN)
     FusionFlashUtil (heartbeat / identify / unlock)  ->  PWFDeviceTracker
     BattFuelGaugeImpl (CAN decode + commands)        ->  BattFuelGauge
     BattFuelGaugeApi.h getters + GetBfgStateJSON     ->  BfgState (snapshot)
@@ -140,6 +179,8 @@ What maps to what (C++ -> Python)
     all of the above wired together                  ->  PWFCanBus
 
 Where this differs from upstream:
+  * Upstream is Windows-only and talks to a CANable or PEAK adapter through
+    their USB drivers directly. This uses Linux SocketCAN instead.
   * Upstream's getters each re-read the bus. Here update() reads it once and
     the getters return the saved values.
   * update() doesn't rate-limit decoding (upstream decodes at most every
@@ -170,6 +211,9 @@ import can
 
 log = logging.getLogger(__name__)
 
+DEFAULT_CHANNEL = "can0"
+# The bus speed BFGs use. SocketCAN sets this at the OS level (`ip link ...
+# bitrate 1000000`); it's only used here in the help message.
 CAN_BITRATE = 1_000_000
 
 # Placeholder secret used by the upstream code unless BFG_HASH_SECRET is defined
@@ -418,30 +462,29 @@ def _fmt(v) -> str:
 # --------------------------------------------------------------------------- #
 
 
-def _ensure_libusb_on_path() -> None:
-    """gs_usb talks to the device through pyusb/libusb. On Windows there's
-    usually no libusb-1.0.dll installed, so we use the one that ships with the
-    `libusb-package` wheel."""
+def _socketcan_is_up(channel: str) -> bool | None:
+    """True/False if the network interface exists and is (not) up, None if it doesn't exist."""
     try:
-        import libusb_package
-    except ImportError:
-        return
-    lib = libusb_package.get_library_path()
-    if lib is not None:
-        d = str(Path(lib).parent)
-        if d not in os.environ.get("PATH", ""):
-            os.environ["PATH"] = d + os.pathsep + os.environ.get("PATH", "")
+        flags = int(Path(f"/sys/class/net/{channel}/flags").read_text().strip(), 16)
+    except (OSError, ValueError):
+        return None
+    return bool(flags & 0x1)  # IFF_UP
 
 
 class CanInterface:
-    """Opens the adapter and runs a background receive thread. It keeps the
-    most recent frame for each arbitration ID, which is what
+    """Opens a Linux SocketCAN interface (can0 by default) and runs a
+    background receive thread. It keeps the most recent frame for each
+    arbitration ID, which is what
     FRC_NetworkCommunication_CANSessionMux_receiveMessage does on the desktop
     build. You can also register listeners to see every frame (the C++ code
-    uses a stream session for this, mainly for heartbeats)."""
+    uses a stream session for this, mainly for heartbeats).
 
-    def __init__(self, bus: can.BusABC | None = None):
+    The bitrate is set by the OS when the interface is brought up (see the
+    module docstring), not here."""
+
+    def __init__(self, bus: can.BusABC | None = None, channel: str = DEFAULT_CHANNEL):
         self._bus: can.BusABC | None = bus
+        self.channel = channel
         self.driver: str | None = "custom" if bus is not None else None
         self._latest: dict[int, _Frame] = {}
         self._lock = threading.Lock()
@@ -452,26 +495,22 @@ class CanInterface:
     # HalCAN_Open
     def open(self) -> bool:
         if self._bus is None:
-            _ensure_libusb_on_path()
+            up = _socketcan_is_up(self.channel)
+            if up is None:
+                log.warning("CAN interface %s not found. Is the CAN HAT/adapter set up? (see `ip link`)",
+                            self.channel)
+                return False
+            if not up:
+                log.warning("CAN interface %s is down. Bring it up with: "
+                            "sudo ip link set %s up type can bitrate %d", self.channel, self.channel, CAN_BITRATE)
+                return False
             try:
-                self._bus = can.Bus(interface="gs_usb", channel=0, index=0, bitrate=CAN_BITRATE)
-                self.driver = "gs_usb"
-                log.info("Found Candle compatible CAN device")
-            except Exception as e:  # noqa: BLE001 - any failure means "try next driver"
-                log.debug("gs_usb open failed: %s", e)
-
-        if self._bus is None:
-            try:
-                self._bus = can.Bus(interface="pcan", channel="PCAN_USBBUS1", bitrate=CAN_BITRATE)
-                self.driver = "pcan"
-                log.info("Found PEAK PCAN compatible CAN device")
+                self._bus = can.Bus(interface="socketcan", channel=self.channel)
+                self.driver = "socketcan"
+                log.info("Opened SocketCAN interface %s", self.channel)
             except Exception as e:  # noqa: BLE001
-                log.debug("pcan open failed: %s", e)
-
-        if self._bus is None:
-            self.driver = None
-            log.warning("No compatible CAN interface detected")
-            return False
+                log.warning("Couldn't open SocketCAN interface %s: %s", self.channel, e)
+                return False
 
         self._stop.clear()
         self._thread = threading.Thread(target=self._rx_loop, name="pwf-can-rx", daemon=True)
@@ -1175,12 +1214,13 @@ class BattFuelGauge:
 
 
 class PWFCanBus:
-    """Puts the adapter, the device tracker and the BFG objects behind one
-    object. You can pass in your own python-can bus (for example a virtual one
-    for testing), or leave it out to auto-detect a gs_usb or PCAN adapter."""
+    """Puts the CAN interface, the device tracker and the BFG objects behind
+    one object. By default it opens the SocketCAN interface `channel` (can0).
+    You can pass in your own python-can bus instead (for example a virtual one
+    for testing)."""
 
-    def __init__(self, bus: can.BusABC | None = None):
-        self.can = CanInterface(bus)
+    def __init__(self, bus: can.BusABC | None = None, channel: str = DEFAULT_CHANNEL):
+        self.can = CanInterface(bus, channel)
         self.tracker = PWFDeviceTracker(self.can)
         self._bfgs: dict[int, BattFuelGauge] = {}
 
@@ -1192,7 +1232,7 @@ class PWFCanBus:
 
     def __enter__(self) -> PWFCanBus:
         if not self.open():
-            raise RuntimeError("No compatible CAN interface detected")
+            raise RuntimeError(f"Couldn't open CAN interface {self.can.channel} (see the log for why)")
         return self
 
     def __exit__(self, *exc) -> None:
@@ -1213,9 +1253,11 @@ class PWFCanBus:
 
 
 if __name__ == "__main__":
+    import sys
+
     logging.basicConfig(level=logging.INFO)
-    with PWFCanBus() as pwf:
-        print(f"Using driver: {pwf.can.driver}. Ctrl+C to exit.")
+    with PWFCanBus(channel=sys.argv[1] if len(sys.argv) > 1 else DEFAULT_CHANNEL) as pwf:
+        print(f"Listening on {pwf.can.channel}. Ctrl+C to exit.")
         try:
             while True:
                 time.sleep(1)
