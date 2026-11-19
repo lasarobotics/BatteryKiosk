@@ -46,7 +46,7 @@ class App(ctk.CTk):
       master=self,
       text="Testing Mode",
       bg_color="transparent",
-      border_color="black",
+      border_color="#dddddd",
       font=("Arial", 24),
       command=self.toggle_mode,
       variable=self.is_match_mode,
@@ -55,6 +55,7 @@ class App(ctk.CTk):
       checkbox_width=24,
       checkbox_height=24,
       corner_radius=5,
+      text_color="#dddddd"
     )
     self.toggle_switch.grid(row=0, column=0, padx=20, pady=(15, 10))
 
@@ -82,6 +83,7 @@ class App(ctk.CTk):
       bg_color="transparent",
       font=("Arial", 48),
       anchor="s", # south
+      text_color="#dddddd"
     )
     self.text2nd.grid(row=1, column=0, padx=(30, 0), pady=(0, 8), sticky="s")
 
@@ -92,13 +94,14 @@ class App(ctk.CTk):
       bg_color="transparent",
       font=("Arial", 48),
       anchor="s", # south
+      text_color="#dddddd"
     )
     self.text3rd.grid(row=1, column=2, padx=(10, 42), pady=(0, 8), sticky="s")
 
     self.test_yell = ctk.CTkLabel(
       master=self,
       text="BATTERIES FOR TESTING!\nDO NOT USE FOR MATCH!!",
-      text_color="black",
+      text_color="#dddddd",
       text_color_disabled="#663399",
       fg_color="transparent",
       bg_color="transparent",
@@ -109,7 +112,7 @@ class App(ctk.CTk):
     self.test_yell.grid(row=0, column=1, columnspan=2, pady=(5, 0))
 
     # Create battery frames
-    self.battery1 = ctk.CTkFrame(
+    self.battery2 = ctk.CTkFrame(
       master=self,
       width=300,
       height=200,
@@ -117,7 +120,7 @@ class App(ctk.CTk):
       border_color="#838587",
       fg_color="#e3e2e1",
     )
-    self.battery2 = ctk.CTkFrame(
+    self.battery1 = ctk.CTkFrame(
       master=self,
       width=360,
       height=240,
@@ -136,21 +139,17 @@ class App(ctk.CTk):
     self.battery1.grid_propagate(False)
     self.battery2.grid_propagate(False)
     self.battery3.grid_propagate(False)
-    self.battery1.grid(row=2, column=0, padx=(42, 10), pady=(0, 100), sticky="s")
-    self.battery2.grid(row=2, column=1, padx=10, pady=(0, 100), sticky="s")
+    self.battery2.grid(row=2, column=0, padx=(42, 10), pady=(0, 100), sticky="s")
+    self.battery1.grid(row=2, column=1, padx=10, pady=(0, 100), sticky="s")
     self.battery3.grid(row=2, column=2, padx=(10, 42), pady=(0, 100), sticky="s")
 
     self.battery_frames = [self.battery1,self.battery2,self.battery3]
-    self.battery_labels = [[],[],[]]
+    self.battery_labels = ["","",""]
     for i in range(3):
-      self.battery_labels[i] = [ctk.CTkLabel(self.battery_frames[i],text="Battery: ----",font=('Arial',28),fg_color="transparent"),
-      ctk.CTkLabel(self.battery_frames[i],text="Voltage: ----",font=('Arial',18),fg_color="transparent"),
-      ctk.CTkLabel(self.battery_frames[i],text="# Cycles: ----",font=('Arial',18),fg_color="transparent"),
-      ctk.CTkLabel(self.battery_frames[i],text="Charging for: ----",font=('Arial',10),fg_color="transparent")]
+      font_size = 20 if i == 0 else 17 if i == 1 else 14
+      self.battery_labels[i] = ctk.CTkLabel(self.battery_frames[i],text="Battery: ----\n\nVoltage: ----\n\n# Cycles: ----\n\nCharging for: ----\n",font=('Arial',font_size),fg_color="transparent")
       self.battery_frames[i].grid_columnconfigure(0, weight=1)
-      for j in range(4):
-        self.battery_frames[i].grid_rowconfigure(j, weight=1)
-        self.battery_labels[i][j].grid(row=j,column=0,padx=0,pady=(10,0) if j == 0 else (0, 5))
+      self.battery_labels[i].grid(row=0,column=0,padx=0,pady=(20,10))
 
   def toggle_mode(self):
     if self.is_match_mode.get():
@@ -159,11 +158,12 @@ class App(ctk.CTk):
       self.first_logo_display.grid(row=1, column=1, padx=0, pady=30)
       self.test_yell.configure(state="disabled")
     else:
-      self.configure(fg_color="#DE2020")
+      self.configure(fg_color="#AB1919")
       self.first_logo_display.grid_remove()
       self.second_logo_display.grid(row=1, column=1, padx=0, pady=30)
       self.test_yell.configure(state="normal")
 
+  # Excludes batteries drawing or discharging more than 600 mA
   def select_batteries(self):
     self.batteries = []
     self.discovered_batteries = self.bus.discovered_bfgs()
@@ -171,10 +171,11 @@ class App(ctk.CTk):
     self.batteries = [
       self.bus.get_bfg(battery.id).update() for battery in self.discovered_batteries
     ]
+    good_batteries = [battery for battery in self.batteries if abs(battery.get_current()) < 0.6]
     if self.is_match_mode.get():
-      return self.find_match_batteries(self.batteries)
+      return self.find_match_batteries(good_batteries)
     else:
-      return self.find_testing_batteries(self.batteries)
+      return self.find_testing_batteries(good_batteries)
 
   # Returns 3 batteries (in descending order of voltage)
   def find_match_batteries(self,batteries):
@@ -211,15 +212,18 @@ class App(ctk.CTk):
     selected_batteries = self.select_batteries()
     for i in range(3):
       if selected_batteries[i] is not None:
-          self.battery_labels[i][0].configure(text="Battery: " + str(selected_batteries[i].sensor_id))
-          self.battery_labels[i][1].configure(text="Voltage: " + str(selected_batteries[i].get_voltage()))
-          self.battery_labels[i][2].configure(text="# Cycles: " + str(selected_batteries[i].get_num_cycles()))
-          self.battery_labels[i][3].configure(text="Charging for: " + self.seconds_converter(selected_batteries[i].get_cycle_charge_time()))
+        self.battery_labels[i].configure(text="Battery: " + str(selected_batteries[i].sensor_id) + "\n\nVoltage: " + str(selected_batteries[i].get_voltage()) + "\n\n# Cycles: " +str(selected_batteries[i].get_num_cycles())+ "\n\nCharging for: " + self.seconds_converter(selected_batteries[i].get_cycle_charge_time()) + "\n",font=('Arial',18),fg_color="transparent")
+        if(selected_batteries[i].get_voltage() < 12):
+          self.battery_frames[i].configure(border_color="#FF3D3D",fg_color="#ff9d00")
+          self.battery_labels[i].configure(text_color="#d10000")
+        else:
+          self.battery_frames[i].configure(border_color="#838587",fg_color="#e3e2e1")
+          self.battery_labels[i].configure(text_color='#000000')
       else:
-        self.battery_labels[i][0].configure(text="Battery: ----")
-        self.battery_labels[i][1].configure(text="Voltage: ----")
-        self.battery_labels[i][2].configure(text="# Cycles: ----")
-        self.battery_labels[i][3].configure(text="Charging for: ----")
+        self.battery_labels[i].configure(text="Battery: ----\n\nVoltage: ----\n\n# Cycles: ----\n\nCharging for: ----\n",text_color="#d10000")
+        if i ==2: self.battery_frames[i].configure(border_color="#FF3D3D",fg_color="#ff9d00")
+        else:
+          self.battery_labels[i].configure(text_color='#000000')
     self.after(1000, self.display_batteries)
 
   #TODO close Bus
