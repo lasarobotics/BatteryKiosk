@@ -6,6 +6,10 @@ from os import path
 
 from app.bfg_can import PWFCanBus
 
+# Absolute path to app/Assets, so images load no matter which folder the
+# kiosk is started from (e.g. a systemd service or autostart entry).
+ASSETS_DIR = path.join(path.dirname(path.abspath(__file__)), "Assets")
+
 
 class App(ctk.CTk):
   def __init__(self):
@@ -17,7 +21,7 @@ class App(ctk.CTk):
     self.configure(fg_color="#663399")
     self.resizable(False, False) # width, height
 
-    png_path = path.join(path.dirname(path.abspath(__file__)), "Assets/LasaRoboticsLogo.png")
+    png_path = path.join(ASSETS_DIR, "LasaRoboticsLogo.png")
     # The logo is 2048x2048. On X11 (e.g. the Pi), Tk sends the window icon to
     # the X server in one request, and an image that big is too large for it
     # (it fails with "BadLength"). Window icons are only shown small anyway.
@@ -66,10 +70,10 @@ class App(ctk.CTk):
 
     # Create Image
     self.first_logo_file = ctk.CTkImage(
-      light_image=Image.open("app/Assets/FIRST_Logo.svg.webp"), size=(150, 150)
+      light_image=Image.open(path.join(ASSETS_DIR, "FIRST_Logo.svg.webp")), size=(150, 150)
     )
     self.second_logo_file = ctk.CTkImage(
-      light_image=Image.open("app/Assets/SecondLogo.png"), size=(150, 150)
+      light_image=Image.open(path.join(ASSETS_DIR, "SecondLogo.png")), size=(150, 150)
     )
     # Display image with a transparent background
     self.first_logo_display = ctk.CTkLabel(
