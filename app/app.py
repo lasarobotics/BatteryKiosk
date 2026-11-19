@@ -70,7 +70,7 @@ class App(ctk.CTk):
 
     # Create Image
     self.first_logo_file = ctk.CTkImage(
-      light_image=Image.open(path.join(ASSETS_DIR, "FIRST_Logo.svg.webp")), size=(150, 150)
+      light_image=Image.open(path.join(ASSETS_DIR, "First_Logo_White.png")), size=(150, 150)
     )
     self.second_logo_file = ctk.CTkImage(
       light_image=Image.open(path.join(ASSETS_DIR, "SecondLogo.png")), size=(150, 150)
@@ -224,15 +224,11 @@ class App(ctk.CTk):
         self.battery_labels[i].configure(text="Battery: " + str(selected_batteries[i].sensor_id) + "\n\nVoltage: " + str(selected_batteries[i].get_voltage()) + "\n\n# Cycles: " +str(selected_batteries[i].get_num_cycles())+ "\n\nCharging for: " + self.seconds_converter(selected_batteries[i].get_cycle_charge_time()) + "\n",font=('Arial',18),fg_color="transparent")
         if(selected_batteries[i].get_voltage() < 12):
           self.battery_frames[i].configure(border_color="#FF3D3D",fg_color="#ff9d00")
-          self.battery_labels[i].configure(text_color="#d10000")
         else:
           self.battery_frames[i].configure(border_color="#838587",fg_color="#e3e2e1")
-          self.battery_labels[i].configure(text_color='#000000')
       else:
-        self.battery_labels[i].configure(text="Battery: ----\n\nVoltage: ----\n\n# Cycles: ----\n\nCharging for: ----\n",text_color="#d10000")
-        if i ==2: self.battery_frames[i].configure(border_color="#FF3D3D",fg_color="#ff9d00")
-        else:
-          self.battery_labels[i].configure(text_color='#000000')
+        self.battery_labels[i].configure(text="Battery: ----\n\nVoltage: ----\n\n# Cycles: ----\n\nCharging for: ----\n")
+        self.battery_frames[i].configure(border_color="#FF3D3D",fg_color="#ff9d00")
     self.after(1000, self.display_batteries)
 
   #TODO close Bus
