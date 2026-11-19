@@ -1,7 +1,7 @@
 import tkinter as tk
 
 import customtkinter as ctk
-from PIL import Image
+from PIL import Image, ImageTk
 from os import path
 
 from app.bfg_can import PWFCanBus
@@ -18,7 +18,12 @@ class App(ctk.CTk):
     self.resizable(False, False) # width, height
 
     png_path = path.join(path.dirname(path.abspath(__file__)), "Assets/LasaRoboticsLogo.png")
-    self.icon_image = tk.PhotoImage(file=png_path)
+    # The logo is 2048x2048. On X11 (e.g. the Pi), Tk sends the window icon to
+    # the X server in one request, and an image that big is too large for it
+    # (it fails with "BadLength"). Window icons are only shown small anyway.
+    icon = Image.open(png_path)
+    icon.thumbnail((64, 64), Image.Resampling.LANCZOS)
+    self.icon_image = ImageTk.PhotoImage(icon)
     self.wm_iconphoto(True, self.icon_image)
 
     # Variables
