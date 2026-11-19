@@ -3,9 +3,11 @@ name = "batterykiosk"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.14"
+# 3.9 so the Pi can use its system Python (Raspberry Pi OS Bullseye ships 3.9).
+# uv-downloaded Pythons have a Tk without Xft, which can't render TTF fonts.
+requires-python = ">=3.9"
 dependencies = [
     "customtkinter>=6.0.0",
-    "pillow>=13.0.0",
+    "pillow>=9.1",  # 9.1 added Image.Resampling; 12+ needs Python 3.10+
     "python-can>=4.6.1",
 ]
