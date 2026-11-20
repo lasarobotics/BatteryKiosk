@@ -1,5 +1,5 @@
 import tkinter as tk
-
+import can
 import customtkinter as ctk
 from PIL import Image, ImageTk
 from os import path
@@ -33,7 +33,12 @@ class App(ctk.CTk):
     # Variables
     self.is_match_mode = tk.BooleanVar(value=True)
     self.bus = PWFCanBus()
-
+    text = "Lasa"
+    wake_text = text.encode("ascii")  
+    wake_message = can.Message(
+    arbitration_id=0x0A0B0700,
+    data=wake_text,
+    is_extended_id=True)
     # Open CanBus TODO error handling
     self.bus.open()
     # Initialize Widgets
@@ -233,3 +238,7 @@ class App(ctk.CTk):
 
   def close_can(self):
     self.bus.close()
+  
+  def wake_can(self):
+    with can.Bus(interface="socketcan", channel="can0") as bus:
+      self.bus.send(self.wake_message, timeout=1.0)
