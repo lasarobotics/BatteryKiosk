@@ -1338,8 +1338,8 @@ class PWFCanBus:
             if c.device == DeviceType.BFG_SENSOR and c.activeOnBus
         ]
 
-    def send(self):
-        self.can.send()
+    def send(self, can_message):
+        self.can.send(arbitration_id=0x0A0B0700, data=can_message, is_extended_id=True)
 
 
 if __name__ == "__main__":
