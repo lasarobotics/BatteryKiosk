@@ -17,7 +17,7 @@ class App(ctk.CTk):
 
     # Window Configuration
     self.title("Purple Haze Battery Kiosk")
-    self.geometry("1024x600")
+    self.geometry("1280x720") # Previously 1024x600
     self.configure(fg_color="#663399")
     self.resizable(False, False) # width, height
     ctk.protocol("WM_DELETE_WINDOW", self.close_can())
