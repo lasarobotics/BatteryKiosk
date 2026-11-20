@@ -20,7 +20,7 @@ class App(ctk.CTk):
     self.geometry("1024x600")
     self.configure(fg_color="#663399")
     self.resizable(False, False) # width, height
-
+    ctk.protocol("WM_DELETE_WINDOW", self.close_can())
     png_path = path.join(ASSETS_DIR, "LasaRoboticsLogo.png")
     # The logo is 2048x2048. On X11 (e.g. the Pi), Tk sends the window icon to
     # the X server in one request, and an image that big is too large for it
@@ -231,4 +231,5 @@ class App(ctk.CTk):
         self.battery_frames[i].configure(border_color="#FF3D3D",fg_color="#ff9d00")
     self.after(1000, self.display_batteries)
 
-  #TODO close Bus
+  def close_can(self):
+    self.bus.close()
