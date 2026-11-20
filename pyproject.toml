@@ -11,3 +11,8 @@ dependencies = [
     "pillow>=9.1",  # 9.1 added Image.Resampling; 12+ needs Python 3.10+
     "python-can>=4.6.1",
 ]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.17.6",
+]

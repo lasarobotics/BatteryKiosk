@@ -533,12 +533,19 @@ class CanInterface:
         if self._bus is None:
             up = _socketcan_is_up(self.channel)
             if up is None:
-                log.warning("CAN interface %s not found. Is the CAN HAT/adapter set up? (see `ip link`)",
-                            self.channel)
+                log.warning(
+                    "CAN interface %s not found. Is the CAN HAT/adapter set up? (see `ip link`)",
+                    self.channel,
+                )
                 return False
             if not up:
-                log.warning("CAN interface %s is down. Bring it up with: "
-                            "sudo ip link set %s up type can bitrate %d", self.channel, self.channel, CAN_BITRATE)
+                log.warning(
+                    "CAN interface %s is down. Bring it up with: "
+                    "sudo ip link set %s up type can bitrate %d",
+                    self.channel,
+                    self.channel,
+                    CAN_BITRATE,
+                )
                 return False
             try:
                 self._bus = can.Bus(interface="socketcan", channel=self.channel)
@@ -549,7 +556,9 @@ class CanInterface:
                 return False
 
         self._stop.clear()
-        self._thread = threading.Thread(target=self._rx_loop, name="pwf-can-rx", daemon=True)
+        self._thread = threading.Thread(
+            target=self._rx_loop, name="pwf-can-rx", daemon=True
+        )
         self._thread.start()
         return True
 
@@ -596,7 +605,9 @@ class CanInterface:
     def send(self, arbitration_id: int, data: bytes | bytearray | list[int]) -> None:
         if self._bus is None:
             return
-        msg = can.Message(arbitration_id=arbitration_id, data=bytes(data), is_extended_id=True)
+        msg = can.Message(
+            arbitration_id=arbitration_id, data=bytes(data), is_extended_id=True
+        )
         try:
             self._bus.send(msg, timeout=1.0)
         except can.CanError as e:
@@ -641,7 +652,9 @@ class PWFDeviceTracker:
                     self._controllers[i] = ctrl
                     return
             self._controllers.append(ctrl)
-        log.info("Found PWF Device: %s, serial number:%d", ctrl.deviceName, ctrl.serialNumber)
+        log.info(
+            "Found PWF Device: %s, serial number:%d", ctrl.deviceName, ctrl.serialNumber
+        )
 
     def get_controller_list(self) -> list[PWFController]:
         with self._lock:
@@ -656,7 +669,14 @@ class PWFDeviceTracker:
 
     @staticmethod
     def _cmd(sub: int, device: int, serial: int) -> list[int]:
-        return [sub, serial & 0xFF, (serial >> 8) & 0xFF, (serial >> 16) & 0xFF, device & 0xFF, (device >> 8) & 0xFF]
+        return [
+            sub,
+            serial & 0xFF,
+            (serial >> 8) & 0xFF,
+            (serial >> 16) & 0xFF,
+            device & 0xFF,
+            (device >> 8) & 0xFF,
+        ]
 
     def set_controller_id(self, device: int, serial_number: int, id_: int) -> None:
         with self._lock:
@@ -666,7 +686,9 @@ class PWFDeviceTracker:
                     break
             else:
                 return
-        self._can.send(CANMsgApiId.REPROG, self._cmd(0x0C, device, serial_number) + [id_ & 0xFF])
+        self._can.send(
+            CANMsgApiId.REPROG, self._cmd(0x0C, device, serial_number) + [id_ & 0xFF]
+        )
 
     def identify_controller(self, device: int, serial_number: int) -> None:
         self._can.send(CANMsgApiId.REPROG, self._cmd(0x0D, device, serial_number))
@@ -744,7 +766,9 @@ class BfgState:
     def get_charge_state_string(self) -> str:
         """Human readable charge state: "Discharging", "Charging", "Idle" or "Open Circuit"."""
         try:
-            return _CHARGE_STATE_STRINGS.get(ChargeState(self.charge_state), "Discharging")
+            return _CHARGE_STATE_STRINGS.get(
+                ChargeState(self.charge_state), "Discharging"
+            )
         except ValueError:
             return "Discharging"
 
@@ -946,7 +970,9 @@ class BfgState:
 
     # JSON
 
-    def to_json(self, event_name: str = "", match_number: int = 0, team_number: int = 0) -> str:
+    def to_json(
+        self, event_name: str = "", match_number: int = 0, team_number: int = 0
+    ) -> str:
         """Same JSON as the C++ GetBfgStateJSON, byte for byte, so the hash
         matches too. The desktop build always reports an empty event name and
         match/team 0, which is why those are the defaults here."""
@@ -1060,7 +1086,10 @@ class BattFuelGauge:
     def is_connected(self) -> bool:
         """Live check: has a Power message arrived in the last 2 s?"""
         f = self._can.receive_latest(CANMsgApiId.POWER | self.sensor_id)
-        return f is not None and (time.monotonic() - f.timestamp) < self.CONNECTED_TIMEOUT_S
+        return (
+            f is not None
+            and (time.monotonic() - f.timestamp) < self.CONNECTED_TIMEOUT_S
+        )
 
     # ---- commands ----------------------------------------------------------
 
@@ -1077,7 +1106,10 @@ class BattFuelGauge:
 
     def set_manufacturer(self, mfg_id: int) -> None:
         self._unlock()
-        self._can.send(CANMsgApiId.SET_NICKNAME2 | self.sensor_id, [0xFF, 0xFF, 0xFF, int(mfg_id) & 0xFF])
+        self._can.send(
+            CANMsgApiId.SET_NICKNAME2 | self.sensor_id,
+            [0xFF, 0xFF, 0xFF, int(mfg_id) & 0xFF],
+        )
 
     def set_calibration_vals(self, current_offset: int, current_gain: int) -> None:
         self._unlock()
@@ -1093,7 +1125,9 @@ class BattFuelGauge:
     def reset_all_battery_stats(self) -> None:
         self._unlock()
         # 0x69 is the magic number that tells the BFG to reset
-        self._can.send(CANMsgApiId.SET_NICKNAME2 | self.sensor_id, [0xFF, 0xFF, 0xFF, 0xFF, 0x69])
+        self._can.send(
+            CANMsgApiId.SET_NICKNAME2 | self.sensor_id, [0xFF, 0xFF, 0xFF, 0xFF, 0x69]
+        )
 
     def _factory_cal(self, kind: int) -> None:
         self._unlock()
@@ -1108,7 +1142,10 @@ class BattFuelGauge:
 
     def set_display(self, inverted: bool) -> None:
         self._unlock()
-        self._can.send(CANMsgApiId.SET_NICKNAME2 | self.sensor_id, [0xFF] * 5 + [1 if inverted else 0])
+        self._can.send(
+            CANMsgApiId.SET_NICKNAME2 | self.sensor_id,
+            [0xFF] * 5 + [1 if inverted else 0],
+        )
 
     # ---- receive / decode --------------------------------------------------
 
@@ -1225,12 +1262,19 @@ class BattFuelGauge:
 
     # ---- JSON / logging ----------------------------------------------------
 
-    def get_bfg_state_json(self, event_name: str = "", match_number: int = 0, team_number: int = 0) -> str:
+    def get_bfg_state_json(
+        self, event_name: str = "", match_number: int = 0, team_number: int = 0
+    ) -> str:
         """Run update() and return the snapshot as JSON (see BfgState.to_json)."""
         return self.update().to_json(event_name, match_number, team_number)
 
-    def save_log(self, filename: str | os.PathLike | None = None, event_name: str = "",
-                 match_type_char: str = "_", match_number: int = 0) -> Path:
+    def save_log(
+        self,
+        filename: str | os.PathLike | None = None,
+        event_name: str = "",
+        match_type_char: str = "_",
+        match_number: int = 0,
+    ) -> Path:
         """Write a JSON snapshot. With no filename it goes to ./logs/, named the same way as the C++ version."""
         if not filename:
             log_dir = Path.cwd() / "logs"
@@ -1240,7 +1284,11 @@ class BattFuelGauge:
                 f"BFGSnapshot_{t:%Y%m%d_%H%M%S}_{event_name}_{match_type_char}{match_number}.json"
             )
         path = Path(filename)
-        path.write_text(self.get_bfg_state_json(event_name, match_number), encoding="latin-1", errors="replace")
+        path.write_text(
+            self.get_bfg_state_json(event_name, match_number),
+            encoding="latin-1",
+            errors="replace",
+        )
         return path
 
 
@@ -1268,7 +1316,9 @@ class PWFCanBus:
 
     def __enter__(self) -> PWFCanBus:
         if not self.open():
-            raise RuntimeError(f"Couldn't open CAN interface {self.can.channel} (see the log for why)")
+            raise RuntimeError(
+                f"Couldn't open CAN interface {self.can.channel} (see the log for why)"
+            )
         return self
 
     def __exit__(self, *exc) -> None:
@@ -1283,26 +1333,32 @@ class PWFCanBus:
     def discovered_bfgs(self) -> list[PWFController]:
         """BFGs whose heartbeat we've seen recently."""
         return [
-            c for c in self.tracker.get_controller_list()
+            c
+            for c in self.tracker.get_controller_list()
             if c.device == DeviceType.BFG_SENSOR and c.activeOnBus
         ]
-    
+
     def send(self):
         self.can.send()
+
 
 if __name__ == "__main__":
     import sys
 
     logging.basicConfig(level=logging.INFO)
-    with PWFCanBus(channel=sys.argv[1] if len(sys.argv) > 1 else DEFAULT_CHANNEL) as pwf:
+    with PWFCanBus(
+        channel=sys.argv[1] if len(sys.argv) > 1 else DEFAULT_CHANNEL
+    ) as pwf:
         print(f"Listening on {pwf.can.channel}. Ctrl+C to exit.")
         try:
             while True:
                 time.sleep(1)
                 for c in pwf.discovered_bfgs():
                     s = pwf.get_bfg(c.id).update()
-                    print(f"[{c.id}] {s.get_nickname()!r:14} {s.get_voltage():6.3f} V {s.get_current():8.3f} A "
-                          f"{s.get_remaining_charge_pct():5.1f}%  {s.get_num_cycles()} cycles  "
-                          f"{s.get_charge_state_string()}")
+                    print(
+                        f"[{c.id}] {s.get_nickname()!r:14} {s.get_voltage():6.3f} V {s.get_current():8.3f} A "
+                        f"{s.get_remaining_charge_pct():5.1f}%  {s.get_num_cycles()} cycles  "
+                        f"{s.get_charge_state_string()}"
+                    )
         except KeyboardInterrupt:
             pass
