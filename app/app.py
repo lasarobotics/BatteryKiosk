@@ -279,4 +279,4 @@ class App(ctk.CTk):
 
     def wake_can(self):
         with can.Bus(interface="socketcan", channel="can0") as bus:
-            self.bus.send(self.wake_message, timeout=1.0)
+            self.bus.send(self.wake_message)
