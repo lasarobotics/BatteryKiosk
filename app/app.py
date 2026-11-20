@@ -20,7 +20,7 @@ class App(ctk.CTk):
     self.geometry("1280x720") # Previously 1024x600
     self.configure(fg_color="#663399")
     self.resizable(False, False) # width, height
-    ctk.protocol("WM_DELETE_WINDOW", self.close_can())
+    self.protocol("WM_DELETE_WINDOW", self.on_closing())
     png_path = path.join(ASSETS_DIR, "LasaRoboticsLogo.png")
     # The logo is 2048x2048. On X11 (e.g. the Pi), Tk sends the window icon to
     # the X server in one request, and an image that big is too large for it
@@ -33,7 +33,7 @@ class App(ctk.CTk):
     # Variables
     self.is_match_mode = tk.BooleanVar(value=True)
     self.bus = PWFCanBus()
-    text = "Lasa"
+    text = "LASA"
     wake_text = text.encode("ascii")  
     wake_message = can.Message(
     arbitration_id=0x0A0B0700,
@@ -223,6 +223,7 @@ class App(ctk.CTk):
     return str(minutes) + str_minutes
   # Displays the information
   def display_batteries(self):
+    self.wake_can()
     selected_batteries = self.select_batteries()
     for i in range(3):
       if selected_batteries[i] is not None:
@@ -236,8 +237,10 @@ class App(ctk.CTk):
         self.battery_frames[i].configure(border_color="#FF3D3D",fg_color="#ff9d00")
     self.after(1000, self.display_batteries)
 
-  def close_can(self):
+  def on_closing(self):
     self.bus.close()
+    self.destroy()
+  
   
   def wake_can(self):
     with can.Bus(interface="socketcan", channel="can0") as bus:
