@@ -126,12 +126,37 @@ Elecrow Pi Terminal (CM4, the kiosk hardware): its built-in CAN port is an
 MCP2515 on SPI1, chip-select 2, with a 16 MHz oscillator and its interrupt on
 GPIO12. This is not the SPI0/GPIO25 layout that `mcp2515-can0` assumes. On
 stock Raspberry Pi OS, add this at the end of /boot/firmware/config.txt
-(settings taken from Elecrow's image; see config.txt in the repo root):
+(settings taken from Elecrow's image, where dmesg shows
+"mcp251x spi1.2 can0: MCP2515 successfully initialized"; see config.txt in
+the terminal-files folder in the repo root):
 
     [all]
-    dtparam=spi=on
     dtoverlay=spi1-3cs
     dtoverlay=mcp2515,spi1-2,oscillator=16000000,interrupt=12,speed=10000000
+
+`dtparam=spi=on` isn't needed (it enables SPI0, not SPI1). The interface
+reports "clock 8000000"; that's normal, because the driver shows half the
+16 MHz oscillator. Then set up 80-can.network as described below, which is
+what Elecrow's image does too.
+
+Pi Terminal real-time clock (optional, not needed for CAN): the board has a
+battery-backed BM8563 RTC (PCF8563-compatible) at address 0x51 on i2c-1.
+Without it, an offline kiosk boots with the wrong time, which shows up in
+save_log() filenames. Elecrow's image loads `i2c-rtc,ds1307`, which fails
+("rtc-ds1307: probe of 1-0068 failed"); it uses a Python script run from
+rc.local instead. On stock Raspberry Pi OS, add to /boot/firmware/config.txt
+(untested):
+
+    [all]
+    dtparam=i2c_arm=on
+    dtoverlay=i2c-rtc,pcf8563
+
+After a reboot, `dmesg | grep -i rtc` should show rtc-pcf8563 registered as
+rtc0, and `sudo hwclock -r` should read it. Once the system clock is right
+(e.g. synced over the network), store it with `sudo hwclock -w`. Then reboot
+with no network and check `date`. If the time is wrong, the usual fix is to
+remove fake-hwclock (`sudo apt purge fake-hwclock`), which can override the
+RTC at boot.
 
 Other adapters: any adapter the kernel turns into a canN interface works, for example:
   * an SPI CAN HAT with an MCP2515 (Waveshare RS485 CAN HAT, PiCAN2, ...).
