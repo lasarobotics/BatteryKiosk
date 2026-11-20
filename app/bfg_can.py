@@ -122,7 +122,18 @@ This uses Linux SocketCAN, so it runs on a Raspberry Pi (Raspberry Pi OS /
 Raspbian) or any other Linux machine, but not on Windows or macOS. It opens
 can0 by default; pass `channel=` to use a different interface.
 
-Any adapter the kernel turns into a canN interface works, for example:
+Elecrow Pi Terminal (CM4, the kiosk hardware): its built-in CAN port is an
+MCP2515 on SPI1, chip-select 2, with a 16 MHz oscillator and its interrupt on
+GPIO12. This is not the SPI0/GPIO25 layout that `mcp2515-can0` assumes. On
+stock Raspberry Pi OS, add this at the end of /boot/firmware/config.txt
+(settings taken from Elecrow's image; see config.txt in the repo root):
+
+    [all]
+    dtparam=spi=on
+    dtoverlay=spi1-3cs
+    dtoverlay=mcp2515,spi1-2,oscillator=16000000,interrupt=12,speed=10000000
+
+Other adapters: any adapter the kernel turns into a canN interface works, for example:
   * an SPI CAN HAT with an MCP2515 (Waveshare RS485 CAN HAT, PiCAN2, ...).
     Enable it in /boot/firmware/config.txt (/boot/config.txt on older
     images), with the oscillator and interrupt pin your HAT uses, e.g.
