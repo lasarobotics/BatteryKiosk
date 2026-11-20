@@ -1339,7 +1339,7 @@ class PWFCanBus:
         ]
 
     def send(self, can_message):
-        self.can.send(arbitration_id=0x0A0B0700, data=can_message, is_extended_id=True)
+        self.can.send(arbitration_id=0x0A0B0700, data=can_message)
 
 
 if __name__ == "__main__":
