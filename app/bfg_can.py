@@ -1261,7 +1261,9 @@ class PWFCanBus:
             c for c in self.tracker.get_controller_list()
             if c.device == DeviceType.BFG_SENSOR and c.activeOnBus
         ]
-
+    
+    def send(self):
+        self.can.send()
 
 if __name__ == "__main__":
     import sys
