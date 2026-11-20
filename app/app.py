@@ -93,7 +93,7 @@ class App(ctk.CTk):
             master=self, image=self.second_logo_file, text=""
         )
 
-        self.first_logo_display.grid(row=1, column=1, padx=0, pady=30)
+        self.first_logo_display.grid(row=1, column=1, padx=0, pady=30,sticky="n")
 
         self.text2nd = ctk.CTkLabel(
             master=self,
@@ -115,7 +115,7 @@ class App(ctk.CTk):
             anchor="s",  # south
             text_color="#dddddd",
         )
-        self.text3rd.grid(row=1, column=2, padx=(10, 42), pady=(0, 8), sticky="s")
+        self.text3rd.grid(row=1, column=2, padx=(10, 42), pady=(50, 8), sticky="s")
 
         self.test_yell = ctk.CTkLabel(
             master=self,
@@ -133,24 +133,24 @@ class App(ctk.CTk):
         # Create battery frames
         self.battery2 = ctk.CTkFrame(
             master=self,
-            width=300,
-            height=200,
+            width=386,
+            height=300,
             border_width=7,
             border_color="#838587",
             fg_color="#e3e2e1",
         )
         self.battery1 = ctk.CTkFrame(
             master=self,
-            width=360,
-            height=240,
+            width=386,
+            height=360,
             border_width=7,
             border_color="#838587",
             fg_color="#e3e2e1",
         )
         self.battery3 = ctk.CTkFrame(
             master=self,
-            width=240,
-            height=160,
+            width=386,
+            height=260,
             border_width=7,
             border_color="#838587",
             fg_color="#e3e2e1",
@@ -158,14 +158,14 @@ class App(ctk.CTk):
         self.battery1.grid_propagate(False)
         self.battery2.grid_propagate(False)
         self.battery3.grid_propagate(False)
-        self.battery2.grid(row=2, column=0, padx=(42, 10), pady=(0, 100), sticky="s")
-        self.battery1.grid(row=2, column=1, padx=10, pady=(0, 100), sticky="s")
-        self.battery3.grid(row=2, column=2, padx=(10, 42), pady=(0, 100), sticky="s")
+        self.battery2.grid(row=2, column=0, padx=(42, 10), pady=(0, 70), sticky="s")
+        self.battery1.grid(row=2, column=1, padx=10, pady=(0, 70), sticky="s")
+        self.battery3.grid(row=2, column=2, padx=(10, 42), pady=(0, 70), sticky="s")
 
         self.battery_frames = [self.battery1, self.battery2, self.battery3]
         self.battery_labels = ["", "", ""]
         for i in range(3):
-            font_size = 20 if i == 0 else 17 if i == 1 else 14
+            font_size = 24 if i == 0 else 22 if i == 1 else 20
             self.battery_labels[i] = ctk.CTkLabel(
                 self.battery_frames[i],
                 text="Battery: ----\n\nVoltage: ----\n\n# Cycles: ----\n\nCharging for: ----\n",
@@ -173,7 +173,7 @@ class App(ctk.CTk):
                 fg_color="transparent",
             )
             self.battery_frames[i].grid_columnconfigure(0, weight=1)
-            self.battery_labels[i].grid(row=0, column=0, padx=0, pady=(20, 10))
+            self.battery_labels[i].grid(row=0, column=0, padx=0, pady=(40, 10))
 
     def toggle_mode(self):
         if self.is_match_mode.get():
@@ -257,8 +257,7 @@ class App(ctk.CTk):
                         selected_batteries[i].get_cycle_charge_time()
                     )
                     + "\n",
-                    font=("Arial", 18),
-                    fg_color="transparent",
+                    fg_color="transparent"
                 )
                 if selected_batteries[i].get_voltage() < 12:
                     self.battery_frames[i].configure(
