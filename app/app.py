@@ -1,3 +1,6 @@
+import signal
+import sys
+import threading
 import tkinter as tk
 import customtkinter as ctk
 from PIL import Image, ImageTk
@@ -20,6 +23,11 @@ class App(ctk.CTk):
         self.configure(fg_color="#663399")
         self.resizable(False, False)  # width, height
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
+        self._closing = False
+        self._update_job = None
+        self._quit_job = None
+        self._quit_requested = threading.Event()
+        self.setup_quit_handlers()
         png_path = path.join(ASSETS_DIR, "LasaRoboticsLogo.png")
         # The logo is 2048x2048. On X11 (e.g. the Pi), Tk sends the window icon to
         # the X server in one request, and an image that big is too large for it
@@ -267,11 +275,64 @@ class App(ctk.CTk):
                 self.battery_frames[i].configure(
                     border_color="#FF3D3D", fg_color="#ff9d00"
                 )
-        self.after(1000, self.display_batteries)
+        self._update_job = self.after(1000, self.display_batteries)
+
+    def setup_quit_handlers(self):
+        # Ctrl+C / Ctrl+D pressed while the kiosk window has focus.
+        for seq in ("<Control-c>", "<Control-C>", "<Control-d>", "<Control-D>"):
+            self.bind_all(seq, lambda event: self.on_closing())
+
+        # Ctrl+C in the terminal (SIGINT) and `kill` / systemd stop (SIGTERM).
+        # Signal handlers can run in the middle of any Python code, so just set
+        # a flag here and let the Tk loop do the actual shutdown.
+        def handle_signal(signum, frame):
+            self._quit_requested.set()
+
+        signal.signal(signal.SIGINT, handle_signal)
+        signal.signal(signal.SIGTERM, handle_signal)
+
+        # Ctrl+D in the terminal sends EOF on stdin. Only watch for it when we
+        # were started from a real terminal; under systemd/autostart stdin is
+        # usually /dev/null, which would hit EOF right away and quit immediately.
+        if sys.stdin is not None and sys.stdin.isatty():
+
+            def watch_stdin():
+                try:
+                    while sys.stdin.readline():
+                        pass
+                except (OSError, ValueError):
+                    return
+                self._quit_requested.set()
+
+            threading.Thread(target=watch_stdin, name="stdin-eof", daemon=True).start()
+
+        self._poll_quit()
+
+    def _poll_quit(self):
+        # Tk's mainloop sits in C code, so Python only notices signals when it
+        # runs some Python code. This wakes it up regularly to check the flag.
+        if self._closing:
+            return
+        if self._quit_requested.is_set():
+            self.on_closing()
+            return
+        self._quit_job = self.after(100, self._poll_quit)
 
     def on_closing(self):
-        self.bus.close()
-        self.destroy()
+        if self._closing:
+            return
+        self._closing = True
+        for job in (self._update_job, self._quit_job):
+            if job is not None:
+                try:
+                    self.after_cancel(job)
+                except tk.TclError:
+                    pass
+        try:
+            self.bus.close()
+        finally:
+            self.quit()
+            self.destroy()
 
     def wake_can(self):
       self.bus.send(self.wake_text)
