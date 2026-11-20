@@ -20,7 +20,7 @@ class App(ctk.CTk):
     self.geometry("1280x720") # Previously 1024x600
     self.configure(fg_color="#663399")
     self.resizable(False, False) # width, height
-    self.protocol("WM_DELETE_WINDOW", self.on_closing())
+    self.protocol("WM_DELETE_WINDOW", self.on_closing)
     png_path = path.join(ASSETS_DIR, "LasaRoboticsLogo.png")
     # The logo is 2048x2048. On X11 (e.g. the Pi), Tk sends the window icon to
     # the X server in one request, and an image that big is too large for it
