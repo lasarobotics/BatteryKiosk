@@ -16,7 +16,7 @@ class App(ctk.CTk):
 
         # Window Configuration
         self.title("Purple Haze Battery Kiosk")
-        self.geometry("1280x720")  # Previously 1024x600
+        self.geometry("1280x684")  # Panel size 1280x720, top bar height 36: 720-36 = 684
         self.configure(fg_color="#663399")
         self.resizable(False, False)  # width, height
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
