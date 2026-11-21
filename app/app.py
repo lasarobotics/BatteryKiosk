@@ -70,13 +70,12 @@ class App(ctk.CTk):
         )
         self.test_yell.configure(state="disabled")
         self.test_yell.grid(row=0, column=1, columnspan=2, pady=(5, 0))
-
+        self.checkbox_frame = ctk.CTkFrame(master=self,width=150,height=30,fg_color="transparent")
         self.toggle_switch = ctk.CTkCheckBox(
-            master=self,
-            text="Testing Mode\n",
+            master=self.checkbox_frame,
             bg_color="transparent",
+            text="",
             border_color="#dddddd",
-            font=("Arial", 24),
             command=self.toggle_mode,
             variable=self.is_match_mode,
             onvalue=False,
@@ -84,9 +83,14 @@ class App(ctk.CTk):
             checkbox_width=24,
             checkbox_height=24,
             corner_radius=5,
-            text_color="#dddddd",
+            width=24,
+            height=24
         )
-        self.toggle_switch.grid(row=0, column=0, padx=20, pady=(15, 0))
+        self.checkbox_frame.grid(row=0,column=0,padx=0, pady=(25, 0))
+        self.checkbox_frame.columnconfigure(index=0,minsize=24)
+        self.test_text=ctk.CTkLabel(master=self.checkbox_frame,text="Testing Mode\n",font=("Arial", 24),text_color="#dddddd",anchor="n")
+        self.toggle_switch.grid(row=0, column=0,sticky="n",pady=2.5)
+        self.test_text.grid(row=0,column=1,sticky="nw")
         # Create Image
         self.first_logo_file = ctk.CTkImage(
             light_image=Image.open(path.join(ASSETS_DIR, "First_Logo_White.png")),
@@ -165,7 +169,7 @@ class App(ctk.CTk):
             font_size = 24 if i == 0 else 22 if i == 1 else 20
             self.battery_labels[i] = ctk.CTkLabel(
                 self.battery_frames[i],
-                text="Battery: ----\n\nVoltage: ----\n\n# Cycles: ----\n\nCharging for: ----",
+                text="Battery: ----\n\nVoltage: ----\n\n# Cycles: ----\n\nCharging for: ----\n",
                 font=("Arial", font_size),
                 fg_color="transparent",
             )
@@ -252,7 +256,7 @@ class App(ctk.CTk):
                     + "\n\nCharging for: "
                     + self.seconds_converter(
                         selected_batteries[i].get_cycle_charge_time()
-                    ),
+                    )+"\n",
                     fg_color="transparent"
                 )
                 if selected_batteries[i].get_voltage() < 12:
@@ -265,7 +269,7 @@ class App(ctk.CTk):
                     )
             else:
                 self.battery_labels[i].configure(
-                    text="Battery: ----\n\nVoltage: ----\n\n# Cycles: ----\n\nCharging for: ----"
+                    text="Battery: ----\n\nVoltage: ----\n\n# Cycles: ----\n\nCharging for: ----\n"
                 )
                 self.battery_frames[i].configure(
                     border_color="#FF3D3D", fg_color="#ff9d00"
