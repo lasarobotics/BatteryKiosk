@@ -168,7 +168,7 @@ class App(ctk.CTk):
             font_size = 24 if i == 0 else 22 if i == 1 else 20
             self.battery_labels[i] = ctk.CTkLabel(
                 self.battery_frames[i],
-                text="Battery: ----\n\nVoltage: ----\n\n# Cycles: ----\n\nCharging for: ----\n",
+                text="Battery: ----\n\nVoltage: ----\n\n# Cycles: ----\n\nCharging for: ----",
                 font=("Arial", font_size),
                 fg_color="transparent",
             )
@@ -255,8 +255,7 @@ class App(ctk.CTk):
                     + "\n\nCharging for: "
                     + self.seconds_converter(
                         selected_batteries[i].get_cycle_charge_time()
-                    )
-                    + "\n",
+                    ),
                     fg_color="transparent"
                 )
                 if selected_batteries[i].get_voltage() < 12:
@@ -269,7 +268,7 @@ class App(ctk.CTk):
                     )
             else:
                 self.battery_labels[i].configure(
-                    text="Battery: ----\n\nVoltage: ----\n\n# Cycles: ----\n\nCharging for: ----\n"
+                    text="Battery: ----\n\nVoltage: ----\n\n# Cycles: ----\n\nCharging for: ----"
                 )
                 self.battery_frames[i].configure(
                     border_color="#FF3D3D", fg_color="#ff9d00"
