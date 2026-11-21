@@ -53,15 +53,27 @@ class App(ctk.CTk):
     def create_widgets(self):
 
         # Configure row weights so Row 0 stays compact and Rows 1-2 share remaining height
-        self.grid_rowconfigure(0, weight=0)
+        self.grid_rowconfigure(0, weight=1)
         self.grid_rowconfigure(1, weight=1)
         self.grid_rowconfigure(2, weight=1)
 
         # Create match and test battery switch
+        self.test_yell = ctk.CTkLabel(
+            master=self,
+            text="BATTERIES FOR TESTING!\nDO NOT USE FOR MATCH!!",
+            text_color="#dddddd",
+            text_color_disabled="#663399",
+            fg_color="transparent",
+            bg_color="transparent",
+            font=("Arial", 30),
+            # anchor="s", # south
+        )
+        self.test_yell.configure(state="disabled")
+        self.test_yell.grid(row=0, column=1, columnspan=2, pady=(5, 0))
 
         self.toggle_switch = ctk.CTkCheckBox(
             master=self,
-            text="Testing Mode",
+            text="Testing Mode\n",
             bg_color="transparent",
             border_color="#dddddd",
             font=("Arial", 24),
@@ -74,8 +86,7 @@ class App(ctk.CTk):
             corner_radius=5,
             text_color="#dddddd",
         )
-        self.toggle_switch.grid(row=0, column=0, padx=20, pady=(15, 10))
-
+        self.toggle_switch.grid(row=0, column=0, padx=20, pady=(15, 0))
         # Create Image
         self.first_logo_file = ctk.CTkImage(
             light_image=Image.open(path.join(ASSETS_DIR, "First_Logo_White.png")),
@@ -92,49 +103,13 @@ class App(ctk.CTk):
         self.second_logo_display = ctk.CTkLabel(
             master=self, image=self.second_logo_file, text=""
         )
-
-        self.first_logo_display.grid(row=1, column=1, padx=0, pady=30,sticky="n")
-
-        self.text2nd = ctk.CTkLabel(
-            master=self,
-            text="2nd",
-            fg_color="transparent",
-            bg_color="transparent",
-            font=("Arial", 48),
-            anchor="s",  # south
-            text_color="#dddddd",
-        )
-        self.text2nd.grid(row=1, column=0, padx=(30, 0), pady=(0, 8), sticky="s")
-
-        self.text3rd = ctk.CTkLabel(
-            master=self,
-            text="3rd",
-            fg_color="transparent",
-            bg_color="transparent",
-            font=("Arial", 48),
-            anchor="s",  # south
-            text_color="#dddddd",
-        )
-        self.text3rd.grid(row=1, column=2, padx=(10, 42), pady=(50, 8), sticky="s")
-
-        self.test_yell = ctk.CTkLabel(
-            master=self,
-            text="BATTERIES FOR TESTING!\nDO NOT USE FOR MATCH!!",
-            text_color="#dddddd",
-            text_color_disabled="#663399",
-            fg_color="transparent",
-            bg_color="transparent",
-            font=("Arial", 30),
-            # anchor="s", # south
-        )
-        self.test_yell.configure(state="disabled")
-        self.test_yell.grid(row=0, column=1, columnspan=2, pady=(5, 0))
+        self.first_logo_display.grid(row=1, column=1, padx=0, pady=0,sticky="s")
 
         # Create battery frames
         self.battery2 = ctk.CTkFrame(
             master=self,
             width=386,
-            height=300,
+            height=280,
             border_width=7,
             border_color="#838587",
             fg_color="#e3e2e1",
@@ -142,7 +117,7 @@ class App(ctk.CTk):
         self.battery1 = ctk.CTkFrame(
             master=self,
             width=386,
-            height=360,
+            height=340,
             border_width=7,
             border_color="#838587",
             fg_color="#e3e2e1",
@@ -162,6 +137,28 @@ class App(ctk.CTk):
         self.battery1.grid(row=2, column=1, padx=10, pady=(0, 70), sticky="s")
         self.battery3.grid(row=2, column=2, padx=(10, 42), pady=(0, 70), sticky="s")
 
+        self.text2nd = ctk.CTkLabel(
+            master=self,
+            text="2nd",
+            fg_color="transparent",
+            bg_color="transparent",
+            font=("Arial", 48),
+            anchor="s",  # south
+            text_color="#dddddd",
+        )
+        self.text2nd.grid(row=2, column=0, padx=(30, 0), pady=(10, 0), sticky="n")
+
+        self.text3rd = ctk.CTkLabel(
+            master=self,
+            text="3rd",
+            fg_color="transparent",
+            bg_color="transparent",
+            font=("Arial", 48),
+            anchor="s",  # south
+            text_color="#dddddd",
+        )
+        self.text3rd.grid(row=2, column=2, padx=(10, 42), pady=(30, 0), sticky="n")
+
         self.battery_frames = [self.battery1, self.battery2, self.battery3]
         self.battery_labels = ["", "", ""]
         for i in range(3):
@@ -179,12 +176,12 @@ class App(ctk.CTk):
         if self.is_match_mode.get():
             self.configure(fg_color="#663399")
             self.second_logo_display.grid_remove()
-            self.first_logo_display.grid(row=1, column=1, padx=0, pady=30)
+            self.first_logo_display.grid(row=1, column=1, padx=0, pady=0,sticky="s")
             self.test_yell.configure(state="disabled")
         else:
             self.configure(fg_color="#AB1919")
             self.first_logo_display.grid_remove()
-            self.second_logo_display.grid(row=1, column=1, padx=0, pady=30)
+            self.second_logo_display.grid(row=1, column=1, padx=0, pady=0,sticky="s")
             self.test_yell.configure(state="normal")
 
     # Excludes batteries drawing or discharging more than 600 mA
